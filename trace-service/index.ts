@@ -1,5 +1,6 @@
 import { Hono } from "hono";
-import { loadConfig } from "./config";
+import { serveStatic } from "hono/bun";
+import { env } from "./config";
 import { closeDb } from "./db";
 import { adminAuthMiddleware } from "./middleware/admin";
 import { authMiddleware } from "./middleware/auth";
@@ -11,7 +12,6 @@ import { handleGetSessionTraces } from "./routes/sessions";
 import { handleGetAnalytics } from "./routes/analytics";
 import { registerShutdownHandlers, setServer, setDbCleanup } from "./shutdown";
 
-const config = loadConfig();
 const app = new Hono();
 
 app.onError(errorHandler);
@@ -20,6 +20,9 @@ app.use("*", logger);
 app.get("/health", (c) => {
   return c.json({ status: "ok", service: "pulse" });
 });
+
+app.use("/dashboard/*", serveStatic({ root: "./static" }));
+app.get("/dashboard", serveStatic({ path: "./static/dashboard/index.html" }));
 
 app.post("/admin/projects", adminAuthMiddleware, handleCreateProject);
 
@@ -31,13 +34,13 @@ app.get("/v1/analytics", authMiddleware, handleGetAnalytics);
 
 const server = Bun.serve({
   fetch: app.fetch,
-  port: config.port,
+  port: env.PORT,
 });
 
 setServer(server);
 setDbCleanup(closeDb);
 registerShutdownHandlers();
 
-console.log(`Pulse server running on port ${config.port}`);
+console.log(`Pulse server running on port ${env.PORT}`);
 
 export { app };

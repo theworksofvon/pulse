@@ -1,14 +1,14 @@
 import type { Context, Next } from "hono";
-import { loadConfig } from "../config";
+import { env } from "../config";
 
 /**
  * Admin authentication middleware for protected admin routes.
  * Validates X-Admin-Key header or admin_key query param against ADMIN_KEY env var.
  */
 export async function adminAuthMiddleware(c: Context, next: Next): Promise<Response | void> {
-  const config = loadConfig();
+  const adminKey = env.ADMIN_KEY;
 
-  if (!config.adminKey) {
+  if (!adminKey) {
     return c.json({ error: "Admin API is not configured" }, 503);
   }
 
@@ -20,7 +20,7 @@ export async function adminAuthMiddleware(c: Context, next: Next): Promise<Respo
     return c.json({ error: "Missing admin key" }, 401);
   }
 
-  if (providedKey !== config.adminKey) {
+  if (providedKey !== adminKey) {
     return c.json({ error: "Invalid admin key" }, 401);
   }
 

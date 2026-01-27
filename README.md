@@ -12,6 +12,40 @@ Pulse captures every LLM call your application makes—prompts, responses, laten
 - **Evals**: Score outputs with heuristics or LLM-as-judge
 - **Dashboards**: Track cost, latency, and quality over time
 
+## Concepts
+
+### Trace
+
+A **trace** is a single LLM API call. Every time your application sends a request to an LLM provider, Pulse captures it as a trace. Each trace includes:
+
+- **Request**: The prompt, model, and parameters you sent
+- **Response**: The completion text, finish reason, and any errors
+- **Metrics**: Input/output token counts, latency (ms), and cost (cents)
+- **Context**: Provider, model requested vs. model used, timestamp
+- **Metadata**: Custom fields you attach (user ID, feature name, etc.)
+
+### Session
+
+A **session** groups related traces together. Use sessions to track:
+
+- **Conversations**: Multi-turn chat interactions with a user
+- **Agent runs**: A sequence of LLM calls made by an autonomous agent
+- **Workflows**: Any logical unit of work involving multiple LLM calls
+
+Sessions let you see the full context of how traces relate to each other, calculate aggregate metrics (total cost, duration), and debug issues across an entire interaction.
+
+### Provider
+
+A **provider** is the LLM service handling your requests. Pulse currently supports:
+
+- **OpenAI**: GPT-4, GPT-3.5, etc.
+- **Anthropic**: Claude 3 Opus, Sonnet, Haiku, etc.
+- **OpenRouter**: Access to multiple models through a single API
+
+### Project
+
+A **project** is a container for your traces and API keys. Use projects to separate environments (production, staging) or different applications. Each project has its own API key for authentication.
+
 ## Why
 
 LLM calls are non-deterministic. A prompt that works today might fail tomorrow. Without visibility into what your models are actually doing, you're debugging blind.

@@ -1,27 +1,22 @@
-interface Config {
-  databaseUrl: string;
-  port: number;
-  adminKey: string | undefined;
+import { z } from "zod";
+
+const envSchema = z.object({
+  DATABASE_URL: z.string().url("DATABASE_URL must be a valid connection string"),
+  PORT: z.coerce.number().default(3000),
+  NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
+  ADMIN_KEY: z.string().optional(),
+});
+
+function parseEnv() {
+  const result = envSchema.safeParse(process.env);
+  if (!result.success) {
+    console.error("Invalid environment configuration:");
+    result.error.issues.forEach((err) => {
+      console.error(`  ${err.path.join(".")}: ${err.message}`);
+    });
+    process.exit(1);
+  }
+  return result.data;
 }
 
-export function loadConfig(): Config {
-  const databaseUrl = process.env.DATABASE_URL;
-  if (!databaseUrl) {
-    throw new Error("DATABASE_URL environment variable is required");
-  }
-
-  const port = parseInt(process.env.PORT ?? "3000", 10);
-  if (isNaN(port)) {
-    throw new Error("PORT must be a valid number");
-  }
-
-  const adminKey = process.env.ADMIN_KEY;
-
-  return {
-    databaseUrl,
-    port,
-    adminKey,
-  };
-}
-
-export type { Config };
+export const env = parseEnv();

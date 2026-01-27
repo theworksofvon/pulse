@@ -53,7 +53,7 @@ export interface StorageAdapter {
   queryTraces(
     projectId: string,
     filters?: TraceQueryFilters
-  ): Promise<TraceQueryResult>;
+  ): Promise<TraceQueryResult>; 
 
   /**
    * Count traces for a project with optional filters.
