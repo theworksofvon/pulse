@@ -70,8 +70,7 @@ export const traces = pgTable(
     metadata: jsonb("metadata"),
   },
   (table) => [
-    index("traces_project_id_idx").on(table.projectId),
-    index("traces_timestamp_idx").on(table.timestamp),
+    index("traces_project_timestamp_idx").on(table.projectId, table.timestamp),
     index("traces_project_session_idx").on(table.projectId, table.sessionId),
   ]
 );

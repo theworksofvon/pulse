@@ -1,4 +1,4 @@
-.PHONY: dev build up down logs migrate studio clean
+.PHONY: dev build up down logs migrate studio clean seed test
 
 # Local development
 dev:
@@ -32,10 +32,18 @@ migrate-push:
 studio:
 	bun run db:studio
 
+seed:
+	bun run db:seed
+
+test:
+	bun test --env-file=.env.test
+
+test-watch:
+	bun test --watch --env-file=.env.test
+
 install:
 	bun install
 	cd dashboard/pulse-dashboard && bun install
 
 clean:
 	rm -rf static
-	rm -rf dashboard/pulse-dashboard/dist
