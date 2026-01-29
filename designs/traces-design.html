@@ -218,7 +218,7 @@
             </a>
           </div>
           <div class="border-t border-neutral-800 py-1">
-            <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-error/80 hover:text-error hover:bg-neutral-850">
+            <a href="#" onclick="handleLogout(event)" class="flex items-center gap-2 px-3 py-2 text-sm text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/5 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
               </svg>
@@ -1082,6 +1082,14 @@
         menu.classList.add('hidden');
       }
     });
+
+    // Logout Handler
+    function handleLogout(e) {
+      e.preventDefault();
+      localStorage.removeItem('authToken');
+      sessionStorage.clear();
+      window.location.href = 'login-design.html';
+    }
 
     function toggleDropdown(id) {
       const dropdown = document.getElementById(id);

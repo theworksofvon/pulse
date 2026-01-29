@@ -32,6 +32,14 @@
             accent: '#3b82f6',
             success: '#22c55e',
             error: '#ef4444',
+            purple: '#a855f7',
+            amber: '#f59e0b',
+            cyan: '#06b6d4',
+            pink: '#ec4899',
+            emerald: '#10b981',
+            orange: '#f97316',
+            indigo: '#6366f1',
+            rose: '#f43f5e',
           },
           fontFamily: {
             sans: ['Inter', 'system-ui', 'sans-serif'],
@@ -90,11 +98,13 @@
     <aside class="w-56 h-full border-r border-neutral-800 flex flex-col flex-shrink-0">
       <!-- Logo -->
       <div class="h-14 flex items-center px-4 border-b border-neutral-800">
-        <div class="flex items-center gap-2">
-          <svg class="w-5 h-5 text-accent" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          <span class="font-semibold text-sm">Pulse</span>
+        <div class="flex items-center gap-2.5">
+          <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <span class="font-semibold text-sm bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Pulse</span>
         </div>
       </div>
 
@@ -157,7 +167,7 @@
       <!-- Footer -->
       <div class="p-3 border-t border-neutral-800 relative">
         <button onclick="toggleUserMenu()" class="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-neutral-400 hover:text-white hover:bg-neutral-850 rounded transition-colors">
-          <div class="w-6 h-6 rounded bg-neutral-700 flex items-center justify-center text-xs font-medium text-white">D</div>
+          <div class="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-medium text-white">D</div>
           <span class="truncate flex-1 text-left">davonte@pulse.dev</span>
           <svg class="w-4 h-4 text-neutral-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
@@ -178,7 +188,7 @@
             </a>
           </div>
           <div class="border-t border-neutral-800 py-1">
-            <a href="#" class="flex items-center gap-2 px-3 py-2 text-sm text-error/80 hover:text-error hover:bg-neutral-850">
+            <a href="#" onclick="handleLogout(event)" class="flex items-center gap-2 px-3 py-2 text-sm text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/5 transition-colors">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
               </svg>
@@ -227,107 +237,187 @@
           <!-- Stats Grid -->
         <div class="grid grid-cols-4 gap-4 mb-6">
           <!-- Total Cost -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Total Cost</span>
-              <span class="text-xs text-success">+12%</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Total Cost</span>
+                </div>
+                <span class="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">+12%</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-emerald-400">$142.87</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">vs $127.51 last period</div>
             </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold text-accent">$142.87</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">vs $127.51 last period</div>
           </div>
 
           <!-- Requests -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Requests</span>
-              <span class="text-xs text-success">+23%</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Requests</span>
+                </div>
+                <span class="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">+23%</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-blue-400">24,847</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">3,549/day average</div>
             </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">24,847</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">3,549/day average</div>
           </div>
 
           <!-- Tokens -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Tokens</span>
-              <span class="text-xs text-success">+8%</span>
-            </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">12.4M</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">
-              <span>8.2M in</span>
-              <span class="mx-1 text-neutral-600">/</span>
-              <span>4.2M out</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Tokens</span>
+                </div>
+                <span class="text-xs text-purple-400 bg-purple-500/10 px-1.5 py-0.5 rounded">+8%</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-purple-400">12.4M</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">
+                <span class="text-purple-400/70">8.2M in</span>
+                <span class="mx-1 text-neutral-600">/</span>
+                <span class="text-purple-400/50">4.2M out</span>
+              </div>
             </div>
           </div>
 
           <!-- Latency -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Avg Latency</span>
-              <span class="text-xs text-success">-5%</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Avg Latency</span>
+                </div>
+                <span class="text-xs text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">-5%</span>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-amber-400">842</span>
+                <span class="text-sm text-amber-400/60">ms</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">P99: 2.4s</div>
             </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">842</span>
-              <span class="text-sm text-neutral-500">ms</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">P99: 2.4s</div>
           </div>
         </div>
 
         <!-- Second Stats Row -->
         <div class="grid grid-cols-4 gap-4 mb-6">
           <!-- Error Rate -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Error Rate</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-rose-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Error Rate</span>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-rose-400">1.2</span>
+                <span class="text-sm text-rose-400/60">%</span>
+              </div>
+              <div class="mt-2 text-xs text-rose-400/70">298 failed</div>
             </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">1.2</span>
-              <span class="text-sm text-neutral-500">%</span>
-            </div>
-            <div class="mt-2 text-xs text-error/70">298 failed</div>
           </div>
 
           <!-- Sessions -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Sessions</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Sessions</span>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-cyan-400">1,847</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">13.4 traces/session</div>
             </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">1,847</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">13.4 traces/session</div>
           </div>
 
           <!-- Cost/Request -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Cost/Request</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Cost/Request</span>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-indigo-400">$0.0057</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">$0.0115/1K tokens</div>
             </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">$0.0057</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">$0.0115/1K tokens</div>
           </div>
 
           <!-- Tokens/Request -->
-          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded p-4">
-            <div class="flex items-center justify-between mb-3">
-              <span class="text-xs text-neutral-500 uppercase tracking-wide">Tokens/Request</span>
-            </div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-2xl font-semibold">499</span>
-            </div>
-            <div class="mt-2 text-xs text-neutral-500">
-              <span>330 in</span>
-              <span class="mx-1 text-neutral-600">/</span>
-              <span>169 out</span>
+          <div class="stat-card bg-neutral-900 border border-neutral-800 rounded-lg p-4 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent"></div>
+            <div class="relative">
+              <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
+                    </svg>
+                  </div>
+                  <span class="text-xs text-neutral-500 uppercase tracking-wide">Tokens/Request</span>
+                </div>
+              </div>
+              <div class="flex items-baseline gap-1">
+                <span class="text-2xl font-semibold text-pink-400">499</span>
+              </div>
+              <div class="mt-2 text-xs text-neutral-500">
+                <span class="text-pink-400/70">330 in</span>
+                <span class="mx-1 text-neutral-600">/</span>
+                <span class="text-pink-400/50">169 out</span>
+              </div>
             </div>
           </div>
         </div>
@@ -335,12 +425,15 @@
         <!-- Charts Row -->
         <div class="grid grid-cols-3 gap-4 mb-6">
           <!-- Cost Over Time -->
-          <div class="col-span-2 bg-neutral-900 border border-neutral-800 rounded p-4">
+          <div class="col-span-2 bg-neutral-900 border border-neutral-800 rounded-lg p-4">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-sm font-medium">Cost Over Time</span>
-              <div class="flex items-center gap-1">
-                <button class="px-2 py-1 text-xs text-accent bg-accent/10 rounded">Day</button>
-                <button class="px-2 py-1 text-xs text-neutral-500 hover:text-white rounded">Hour</button>
+              <div class="flex items-center gap-2">
+                <div class="w-1 h-4 bg-gradient-to-b from-emerald-400 to-emerald-600 rounded-full"></div>
+                <span class="text-sm font-medium">Cost Over Time</span>
+              </div>
+              <div class="flex items-center gap-1 bg-neutral-850 p-0.5 rounded">
+                <button class="px-2.5 py-1 text-xs text-emerald-400 bg-emerald-500/10 rounded font-medium">Day</button>
+                <button class="px-2.5 py-1 text-xs text-neutral-500 hover:text-white rounded">Hour</button>
               </div>
             </div>
             <div class="chart-container">
@@ -349,34 +442,37 @@
           </div>
 
           <!-- Provider Split -->
-          <div class="bg-neutral-900 border border-neutral-800 rounded p-4">
+          <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-sm font-medium">By Provider</span>
+              <div class="flex items-center gap-2">
+                <div class="w-1 h-4 bg-gradient-to-b from-orange-400 to-rose-500 rounded-full"></div>
+                <span class="text-sm font-medium">By Provider</span>
+              </div>
             </div>
             <div class="chart-container" style="height: 160px;">
               <canvas id="providerChart"></canvas>
             </div>
-            <div class="mt-4 space-y-2">
+            <div class="mt-4 space-y-2.5">
               <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-sm bg-accent"></div>
-                  <span class="text-neutral-400">OpenAI</span>
+                  <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
+                  <span class="text-neutral-300">OpenAI</span>
                 </div>
-                <span>$89.42</span>
+                <span class="text-emerald-400 font-medium">$89.42</span>
               </div>
               <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-sm bg-neutral-400"></div>
-                  <span class="text-neutral-400">Anthropic</span>
+                  <div class="w-2.5 h-2.5 rounded-full bg-orange-400"></div>
+                  <span class="text-neutral-300">Anthropic</span>
                 </div>
-                <span>$42.15</span>
+                <span class="text-orange-400 font-medium">$42.15</span>
               </div>
               <div class="flex items-center justify-between text-sm">
                 <div class="flex items-center gap-2">
-                  <div class="w-2 h-2 rounded-sm bg-neutral-600"></div>
-                  <span class="text-neutral-400">OpenRouter</span>
+                  <div class="w-2.5 h-2.5 rounded-full bg-violet-400"></div>
+                  <span class="text-neutral-300">OpenRouter</span>
                 </div>
-                <span>$11.30</span>
+                <span class="text-violet-400 font-medium">$11.30</span>
               </div>
             </div>
           </div>
@@ -385,33 +481,36 @@
         <!-- Model Performance & Latency -->
         <div class="grid grid-cols-2 gap-4 mb-6">
           <!-- Models -->
-          <div class="bg-neutral-900 border border-neutral-800 rounded p-4">
+          <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-sm font-medium">Model Performance</span>
-              <button class="text-xs text-accent/70 hover:text-accent">View all</button>
+              <div class="flex items-center gap-2">
+                <div class="w-1 h-4 bg-gradient-to-b from-purple-400 to-pink-500 rounded-full"></div>
+                <span class="text-sm font-medium">Model Performance</span>
+              </div>
+              <button class="text-xs text-purple-400 hover:text-purple-300">View all</button>
             </div>
             <div class="space-y-3">
               <!-- GPT-4 -->
-              <div class="p-3 bg-neutral-850 border border-neutral-800 rounded">
+              <div class="p-3 bg-neutral-850 border-l-2 border-l-emerald-400 border border-neutral-800 rounded-r">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">OpenAI</span>
-                    <span class="text-sm">gpt-4-turbo</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded font-medium">OpenAI</span>
+                    <span class="text-sm font-medium">gpt-4-turbo</span>
                   </div>
-                  <span class="text-xs text-neutral-500">8,421 req</span>
+                  <span class="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">8,421 req</span>
                 </div>
                 <div class="grid grid-cols-4 gap-3 text-center">
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Cost</div>
-                    <div class="text-sm font-medium">$52.14</div>
+                    <div class="text-sm font-medium text-emerald-400">$52.14</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Latency</div>
-                    <div class="text-sm font-medium">1.2s</div>
+                    <div class="text-sm font-medium text-amber-400">1.2s</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Tokens</div>
-                    <div class="text-sm font-medium">4.2M</div>
+                    <div class="text-sm font-medium text-purple-400">4.2M</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Errors</div>
@@ -421,26 +520,26 @@
               </div>
 
               <!-- Claude -->
-              <div class="p-3 bg-neutral-850 border border-neutral-800 rounded">
+              <div class="p-3 bg-neutral-850 border-l-2 border-l-orange-400 border border-neutral-800 rounded-r">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">Anthropic</span>
-                    <span class="text-sm">claude-3-opus</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-orange-500/10 text-orange-400 rounded font-medium">Anthropic</span>
+                    <span class="text-sm font-medium">claude-3-opus</span>
                   </div>
-                  <span class="text-xs text-neutral-500">5,847 req</span>
+                  <span class="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">5,847 req</span>
                 </div>
                 <div class="grid grid-cols-4 gap-3 text-center">
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Cost</div>
-                    <div class="text-sm font-medium">$38.92</div>
+                    <div class="text-sm font-medium text-emerald-400">$38.92</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Latency</div>
-                    <div class="text-sm font-medium">980ms</div>
+                    <div class="text-sm font-medium text-amber-400">980ms</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Tokens</div>
-                    <div class="text-sm font-medium">3.1M</div>
+                    <div class="text-sm font-medium text-purple-400">3.1M</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Errors</div>
@@ -450,30 +549,30 @@
               </div>
 
               <!-- GPT-3.5 -->
-              <div class="p-3 bg-neutral-850 border border-neutral-800 rounded">
+              <div class="p-3 bg-neutral-850 border-l-2 border-l-emerald-400 border border-neutral-800 rounded-r">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">OpenAI</span>
-                    <span class="text-sm">gpt-3.5-turbo</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded font-medium">OpenAI</span>
+                    <span class="text-sm font-medium">gpt-3.5-turbo</span>
                   </div>
-                  <span class="text-xs text-neutral-500">10,579 req</span>
+                  <span class="text-xs text-blue-400 bg-blue-500/10 px-1.5 py-0.5 rounded">10,579 req</span>
                 </div>
                 <div class="grid grid-cols-4 gap-3 text-center">
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Cost</div>
-                    <div class="text-sm font-medium">$8.24</div>
+                    <div class="text-sm font-medium text-emerald-400">$8.24</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Latency</div>
-                    <div class="text-sm font-medium">420ms</div>
+                    <div class="text-sm font-medium text-emerald-400">420ms</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Tokens</div>
-                    <div class="text-sm font-medium">5.1M</div>
+                    <div class="text-sm font-medium text-purple-400">5.1M</div>
                   </div>
                   <div>
                     <div class="text-xs text-neutral-500 mb-0.5">Errors</div>
-                    <div class="text-sm font-medium text-error/80">2.1%</div>
+                    <div class="text-sm font-medium text-rose-400">2.1%</div>
                   </div>
                 </div>
               </div>
@@ -481,13 +580,16 @@
           </div>
 
           <!-- Latency Distribution -->
-          <div class="bg-neutral-900 border border-neutral-800 rounded p-4">
+          <div class="bg-neutral-900 border border-neutral-800 rounded-lg p-4">
             <div class="flex items-center justify-between mb-4">
-              <span class="text-sm font-medium">Latency Distribution</span>
-              <div class="flex items-center gap-3 text-xs text-neutral-500">
-                <span>P50: 640ms</span>
-                <span>P95: 1.8s</span>
-                <span>P99: 2.4s</span>
+              <div class="flex items-center gap-2">
+                <div class="w-1 h-4 bg-gradient-to-b from-amber-400 to-orange-500 rounded-full"></div>
+                <span class="text-sm font-medium">Latency Distribution</span>
+              </div>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded">P50: 640ms</span>
+                <span class="px-2 py-0.5 bg-amber-500/10 text-amber-400 rounded">P95: 1.8s</span>
+                <span class="px-2 py-0.5 bg-rose-500/10 text-rose-400 rounded">P99: 2.4s</span>
               </div>
             </div>
             <div class="chart-container">
@@ -497,9 +599,12 @@
         </div>
 
         <!-- Recent Traces -->
-        <div class="bg-neutral-900 border border-neutral-800 rounded">
+        <div class="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
           <div class="flex items-center justify-between p-4 border-b border-neutral-800">
-            <span class="text-sm font-medium">Recent Traces</span>
+            <div class="flex items-center gap-2">
+              <div class="w-1 h-4 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+              <span class="text-sm font-medium">Recent Traces</span>
+            </div>
             <div class="flex items-center gap-2">
               <!-- Search -->
               <div class="flex items-center gap-2 px-2.5 py-1.5 bg-neutral-850 border border-neutral-800 rounded">
@@ -535,132 +640,132 @@
               <tbody>
                 <tr class="table-row border-b border-neutral-800 cursor-pointer">
                   <td class="py-2.5 px-4">
-                    <span class="text-sm font-mono text-accent/80 hover:text-accent">tr_8f4a2b1c</span>
+                    <span class="text-sm font-mono text-cyan-400 hover:text-cyan-300">tr_8f4a2b1c</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm text-neutral-500">2m ago</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">OpenAI</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded font-medium">OpenAI</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm">gpt-4-turbo</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-400">842 / 256</span>
+                    <span class="text-sm"><span class="text-purple-400">842</span> <span class="text-neutral-600">/</span> <span class="text-purple-400/60">256</span></span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">1.24s</span>
+                    <span class="text-sm text-amber-400">1.24s</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">$0.0142</span>
+                    <span class="text-sm text-emerald-400">$0.0142</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded">OK</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded font-medium">OK</span>
                   </td>
                 </tr>
                 <tr class="table-row border-b border-neutral-800 cursor-pointer">
                   <td class="py-2.5 px-4">
-                    <span class="text-sm font-mono text-accent/80 hover:text-accent">tr_7e3d9a0f</span>
+                    <span class="text-sm font-mono text-cyan-400 hover:text-cyan-300">tr_7e3d9a0f</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm text-neutral-500">5m ago</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">Anthropic</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-orange-500/10 text-orange-400 rounded font-medium">Anthropic</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm">claude-3-sonnet</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-400">1,204 / 512</span>
+                    <span class="text-sm"><span class="text-purple-400">1,204</span> <span class="text-neutral-600">/</span> <span class="text-purple-400/60">512</span></span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">876ms</span>
+                    <span class="text-sm text-emerald-400">876ms</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">$0.0089</span>
+                    <span class="text-sm text-emerald-400">$0.0089</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded">OK</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded font-medium">OK</span>
                   </td>
                 </tr>
                 <tr class="table-row border-b border-neutral-800 cursor-pointer">
                   <td class="py-2.5 px-4">
-                    <span class="text-sm font-mono text-accent/80 hover:text-accent">tr_6c2b8e7d</span>
+                    <span class="text-sm font-mono text-cyan-400 hover:text-cyan-300">tr_6c2b8e7d</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm text-neutral-500">8m ago</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">OpenAI</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-emerald-500/10 text-emerald-400 rounded font-medium">OpenAI</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm">gpt-3.5-turbo</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-400">256 / 128</span>
+                    <span class="text-sm"><span class="text-purple-400">256</span> <span class="text-neutral-600">/</span> <span class="text-purple-400/60">128</span></span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">342ms</span>
+                    <span class="text-sm text-emerald-400">342ms</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">$0.0004</span>
+                    <span class="text-sm text-emerald-400">$0.0004</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded">OK</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded font-medium">OK</span>
                   </td>
                 </tr>
-                <tr class="table-row border-b border-neutral-800 cursor-pointer bg-neutral-850">
+                <tr class="table-row border-b border-neutral-800 cursor-pointer bg-rose-500/5">
                   <td class="py-2.5 px-4">
-                    <span class="text-sm font-mono text-accent/80 hover:text-accent">tr_5a1c7f4e</span>
+                    <span class="text-sm font-mono text-cyan-400 hover:text-cyan-300">tr_5a1c7f4e</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm text-neutral-500">12m ago</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">OpenRouter</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-violet-500/10 text-violet-400 rounded font-medium">OpenRouter</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm">mixtral-8x7b</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-400">512 / --</span>
+                    <span class="text-sm"><span class="text-purple-400">512</span> <span class="text-neutral-600">/</span> <span class="text-neutral-600">--</span></span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-500">--</span>
+                    <span class="text-sm text-neutral-600">--</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-500">--</span>
+                    <span class="text-sm text-neutral-600">--</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-error/10 text-error rounded">ERR</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-rose-500/10 text-rose-400 rounded font-medium">ERR</span>
                   </td>
                 </tr>
                 <tr class="table-row border-b border-neutral-800 cursor-pointer">
                   <td class="py-2.5 px-4">
-                    <span class="text-sm font-mono text-accent/80 hover:text-accent">tr_4d0e6b3a</span>
+                    <span class="text-sm font-mono text-cyan-400 hover:text-cyan-300">tr_4d0e6b3a</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm text-neutral-500">15m ago</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded">Anthropic</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-orange-500/10 text-orange-400 rounded font-medium">Anthropic</span>
                   </td>
                   <td class="py-2.5 px-4">
                     <span class="text-sm">claude-3-opus</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm text-neutral-400">2,048 / 1,024</span>
+                    <span class="text-sm"><span class="text-purple-400">2,048</span> <span class="text-neutral-600">/</span> <span class="text-purple-400/60">1,024</span></span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">2.1s</span>
+                    <span class="text-sm text-amber-400">2.1s</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-sm">$0.0845</span>
+                    <span class="text-sm text-emerald-400">$0.0845</span>
                   </td>
                   <td class="py-2.5 px-4">
-                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded">OK</span>
+                    <span class="text-xs px-1.5 py-0.5 bg-success/10 text-success rounded font-medium">OK</span>
                   </td>
                 </tr>
               </tbody>
@@ -835,6 +940,16 @@
       }
     });
 
+    // Logout Handler
+    function handleLogout(e) {
+      e.preventDefault();
+      // Clear any stored auth data
+      localStorage.removeItem('authToken');
+      sessionStorage.clear();
+      // Redirect to login page
+      window.location.href = 'login-design.html';
+    }
+
     // Cost Chart
     const costCtx = document.getElementById('costChart').getContext('2d');
     new Chart(costCtx, {
@@ -845,33 +960,38 @@
           {
             label: 'OpenAI',
             data: [12.5, 14.2, 11.8, 15.3, 13.9, 12.1, 9.62],
-            borderColor: '#3b82f6',
-            backgroundColor: 'rgba(59, 130, 246, 0.05)',
-            borderWidth: 1.5,
+            borderColor: '#34d399',
+            backgroundColor: 'rgba(52, 211, 153, 0.08)',
+            borderWidth: 2,
             fill: true,
             tension: 0.3,
             pointRadius: 0,
-            pointHoverRadius: 4,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#34d399',
           },
           {
             label: 'Anthropic',
             data: [5.8, 6.2, 7.1, 5.9, 6.8, 5.4, 4.95],
-            borderColor: '#737373',
-            backgroundColor: 'transparent',
-            borderWidth: 1.5,
+            borderColor: '#fb923c',
+            backgroundColor: 'rgba(251, 146, 60, 0.05)',
+            borderWidth: 2,
+            fill: true,
             tension: 0.3,
             pointRadius: 0,
-            pointHoverRadius: 4,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#fb923c',
           },
           {
             label: 'OpenRouter',
             data: [1.2, 1.8, 1.5, 2.1, 1.9, 1.6, 1.2],
-            borderColor: '#3d3d3d',
-            backgroundColor: 'transparent',
-            borderWidth: 1.5,
+            borderColor: '#a78bfa',
+            backgroundColor: 'rgba(167, 139, 250, 0.05)',
+            borderWidth: 2,
+            fill: true,
             tension: 0.3,
             pointRadius: 0,
-            pointHoverRadius: 4,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#a78bfa',
           }
         ]
       },
@@ -885,11 +1005,11 @@
             position: 'top',
             align: 'end',
             labels: {
-              color: '#525252',
+              color: '#a3a3a3',
               usePointStyle: true,
-              pointStyle: 'line',
-              padding: 16,
-              font: { size: 11 }
+              pointStyle: 'circle',
+              padding: 20,
+              font: { size: 11, weight: 500 }
             }
           },
           tooltip: {
@@ -930,15 +1050,17 @@
         labels: ['OpenAI', 'Anthropic', 'OpenRouter'],
         datasets: [{
           data: [89.42, 42.15, 11.30],
-          backgroundColor: ['#3b82f6', '#737373', '#3d3d3d'],
+          backgroundColor: ['#34d399', '#fb923c', '#a78bfa'],
           borderWidth: 0,
-          hoverOffset: 2
+          hoverOffset: 4,
+          hoverBorderWidth: 2,
+          hoverBorderColor: '#fff'
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '75%',
+        cutout: '70%',
         plugins: {
           legend: { display: false },
           tooltip: {
@@ -947,7 +1069,7 @@
             borderWidth: 1,
             titleColor: '#fff',
             bodyColor: '#a3a3a3',
-            padding: 10,
+            padding: 12,
             callbacks: {
               label: ctx => {
                 const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
@@ -960,8 +1082,13 @@
       }
     });
 
-    // Latency Chart
+    // Latency Chart - create gradient
     const latencyCtx = document.getElementById('latencyChart').getContext('2d');
+    const latencyGradient = latencyCtx.createLinearGradient(0, 0, latencyCtx.canvas.width, 0);
+    latencyGradient.addColorStop(0, '#34d399');
+    latencyGradient.addColorStop(0.5, '#fbbf24');
+    latencyGradient.addColorStop(1, '#f43f5e');
+
     new Chart(latencyCtx, {
       type: 'bar',
       data: {
@@ -969,9 +1096,9 @@
         datasets: [{
           label: 'Requests',
           data: [1200, 3800, 6200, 5400, 4100, 2800, 980, 367],
-          backgroundColor: ctx => ctx.dataIndex === 2 ? 'rgba(59, 130, 246, 0.5)' : '#2e2e2e',
-          hoverBackgroundColor: ctx => ctx.dataIndex === 2 ? 'rgba(59, 130, 246, 0.7)' : '#3d3d3d',
-          borderRadius: 2,
+          backgroundColor: ['#34d399', '#4ade80', '#a3e635', '#facc15', '#fbbf24', '#fb923c', '#f97316', '#f43f5e'],
+          hoverBackgroundColor: ['#34d399cc', '#4ade80cc', '#a3e635cc', '#facc15cc', '#fbbf24cc', '#fb923ccc', '#f97316cc', '#f43f5ecc'],
+          borderRadius: 4,
           borderSkipped: false,
         }]
       },
@@ -986,7 +1113,7 @@
             borderWidth: 1,
             titleColor: '#fff',
             bodyColor: '#a3a3a3',
-            padding: 10,
+            padding: 12,
             callbacks: {
               title: ctx => ctx[0].label + 'ms',
               label: ctx => ctx.raw.toLocaleString() + ' requests'
