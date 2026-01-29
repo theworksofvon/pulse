@@ -6,7 +6,14 @@ import {
   getAvgLatency,
   getErrorRate,
   getCostOverTime,
-  type CostDataPoint,
+  getTotalRequests,
+  getTotalSessions,
+  getCostByProvider,
+  getStatsByModel,
+  getCostOverTimeByProvider,
+  type CostByProvider,
+  type StatsByModel,
+  type CostOverTimeByProvider,
 } from "../db/analytics";
 
 /**
@@ -18,10 +25,24 @@ export interface AnalyticsDateRange {
 }
 
 /**
+ * Computed metrics derived from raw data.
+ */
+export interface ComputedMetrics {
+  costPerRequest: number;
+  tokensPerRequest: number;
+  costPer1kTokens: number;
+  tracesPerSession: number;
+  avgInputTokens: number;
+  avgOutputTokens: number;
+}
+
+/**
  * Result of an analytics query.
  */
 export interface AnalyticsResult {
   totalCost: number;
+  totalRequests: number;
+  totalSessions: number;
   totalTokens: {
     input: number;
     output: number;
@@ -29,7 +50,39 @@ export interface AnalyticsResult {
   };
   avgLatency: number;
   errorRate: number;
-  costOverTime: CostDataPoint[];
+  costOverTime: CostOverTimeByProvider[];
+  costByProvider: CostByProvider[];
+  topModels: StatsByModel[];
+  computed: ComputedMetrics;
+}
+
+/**
+ * Safely divide two numbers, returning 0 if divisor is 0.
+ */
+function safeDivide(numerator: number, denominator: number): number {
+  if (denominator === 0) return 0;
+  return numerator / denominator;
+}
+
+/**
+ * Compute derived metrics from raw analytics data.
+ */
+function computeMetrics(
+  totalCost: number,
+  totalRequests: number,
+  totalSessions: number,
+  inputTokens: number,
+  outputTokens: number,
+  totalTokens: number
+): ComputedMetrics {
+  return {
+    costPerRequest: safeDivide(totalCost, totalRequests),
+    tokensPerRequest: safeDivide(totalTokens, totalRequests),
+    costPer1kTokens: safeDivide(totalCost, totalTokens) * 1000,
+    tracesPerSession: safeDivide(totalRequests, totalSessions),
+    avgInputTokens: safeDivide(inputTokens, totalRequests),
+    avgOutputTokens: safeDivide(outputTokens, totalRequests),
+  };
 }
 
 /**
@@ -47,17 +100,41 @@ export async function getAnalytics(
     dateTo: dateRange.dateTo,
   };
 
-  const [totalCost, tokens, avgLatency, errorRate, costOverTime] =
-    await Promise.all([
-      getTotalCost(db, projectId, dbDateRange),
-      getTotalTokens(db, projectId, dbDateRange),
-      getAvgLatency(db, projectId, dbDateRange),
-      getErrorRate(db, projectId, dbDateRange),
-      getCostOverTime(db, projectId, dbDateRange, groupBy),
-    ]);
+  const [
+    totalCost,
+    totalRequests,
+    totalSessions,
+    tokens,
+    avgLatency,
+    errorRate,
+    costOverTimeByProvider,
+    costByProvider,
+    topModels,
+  ] = await Promise.all([
+    getTotalCost(db, projectId, dbDateRange),
+    getTotalRequests(db, projectId, dbDateRange),
+    getTotalSessions(db, projectId, dbDateRange),
+    getTotalTokens(db, projectId, dbDateRange),
+    getAvgLatency(db, projectId, dbDateRange),
+    getErrorRate(db, projectId, dbDateRange),
+    getCostOverTimeByProvider(db, projectId, dbDateRange, groupBy === "hour" ? "hour" : "day"),
+    getCostByProvider(db, projectId, dbDateRange),
+    getStatsByModel(db, projectId, dbDateRange, 5),
+  ]);
+
+  const computed = computeMetrics(
+    totalCost,
+    totalRequests,
+    totalSessions,
+    tokens.inputTokens,
+    tokens.outputTokens,
+    tokens.totalTokens
+  );
 
   return {
     totalCost,
+    totalRequests,
+    totalSessions,
     totalTokens: {
       input: tokens.inputTokens,
       output: tokens.outputTokens,
@@ -65,6 +142,9 @@ export async function getAnalytics(
     },
     avgLatency,
     errorRate,
-    costOverTime,
+    costOverTime: costOverTimeByProvider,
+    costByProvider,
+    topModels,
+    computed,
   };
 }

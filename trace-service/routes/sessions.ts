@@ -15,5 +15,10 @@ export async function handleGetSessionTraces(c: Context): Promise<Response> {
 
   const result = await getSessionTraces(sessionId, projectId, storage);
 
+  // Return 404 if session has no traces (doesn't exist or belongs to another project)
+  if (result.traces.length === 0) {
+    return c.json({ error: "Session not found" }, 404);
+  }
+
   return c.json(result, 200);
 }
