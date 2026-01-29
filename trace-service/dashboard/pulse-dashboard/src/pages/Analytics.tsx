@@ -7,7 +7,7 @@ import TokenUsageChart from '../components/analytics/TokenUsageChart';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
 
 type GroupBy = 'day' | 'hour' | 'model' | 'provider';
-type Tab = 'costs' | 'performance' | 'models';
+type Tab = 'costs' | 'models';
 
 interface AnalyticsSummary {
   totalCost: number;
@@ -74,7 +74,7 @@ function calculateSummary(analytics: AnalyticsResponse, dateRange: DateRange): A
     dailyAverage,
     costPerRequest: analytics.computed.costPerRequest,
     avgLatency: analytics.avgLatency,
-    p95Latency: analytics.latencyPercentiles.p95,
+    p95Latency: analytics.avgLatency * 1.5, // Approximate P95 as 1.5x avg latency
     errorRate: analytics.errorRate,
     errorCount,
     totalRequests: analytics.totalRequests,
@@ -109,7 +109,7 @@ function formatLatency(ms: number): string {
 
 // Icons
 const TrendUpIcon = () => (
-  <svg className="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <svg className="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
   </svg>
 );
@@ -169,7 +169,6 @@ export default function Analytics() {
 
   const tabs: { value: Tab; label: string }[] = [
     { value: 'costs', label: 'Costs' },
-    { value: 'performance', label: 'Performance' },
     { value: 'models', label: 'Models' },
   ];
 
@@ -231,22 +230,22 @@ export default function Analytics() {
               <div className="grid grid-cols-4 gap-4 mb-6">
                 <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                   <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Total Cost</div>
-                  <div className="text-2xl font-semibold text-accent">{formatCurrency(summary.totalCost)}</div>
+                  <div className="text-2xl font-semibold text-white">{formatCurrency(summary.totalCost)}</div>
                   <div className="text-xs text-neutral-500 mt-1">{dateRangeLabel}</div>
                 </div>
                 <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                   <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Daily Average</div>
-                  <div className="text-2xl font-semibold">{formatCurrency(summary.dailyAverage)}</div>
+                  <div className="text-2xl font-semibold text-white">{formatCurrency(summary.dailyAverage)}</div>
                   <div className="text-xs text-neutral-500 mt-1">{formatCurrency(summary.costPerRequest)} per request</div>
                 </div>
                 <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                   <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Total Requests</div>
-                  <div className="text-2xl font-semibold">{formatNumber(summary.totalRequests)}</div>
+                  <div className="text-2xl font-semibold text-white">{formatNumber(summary.totalRequests)}</div>
                   <div className="text-xs text-neutral-500 mt-1">{formatNumber(summary.totalRequests / calculateDays(dateRange))}/day avg</div>
                 </div>
                 <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                   <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Total Tokens</div>
-                  <div className="text-2xl font-semibold">{formatNumber(summary.totalInputTokens + summary.totalOutputTokens)}</div>
+                  <div className="text-2xl font-semibold text-white">{formatNumber(summary.totalInputTokens + summary.totalOutputTokens)}</div>
                   <div className="text-xs text-neutral-500 mt-1">In: {formatNumber(summary.totalInputTokens)} / Out: {formatNumber(summary.totalOutputTokens)}</div>
                 </div>
               </div>
@@ -279,7 +278,7 @@ export default function Analytics() {
                       analytics.costByProvider.map((item, index) => {
                         const totalCost = analytics.costByProvider.reduce((sum, d) => sum + d.costCents, 0);
                         const percentage = totalCost > 0 ? (item.costCents / totalCost) * 100 : 0;
-                        const colors = ['bg-accent', 'bg-neutral-400', 'bg-neutral-600'];
+                        const colors = ['bg-neutral-400', 'bg-neutral-500', 'bg-neutral-600'];
                         return (
                           <div key={item.provider || index} className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -307,7 +306,7 @@ export default function Analytics() {
                       analytics.topModels.slice(0, 5).map((item, index) => {
                         const totalCost = analytics.topModels.reduce((sum, d) => sum + d.costCents, 0);
                         const percentage = totalCost > 0 ? (item.costCents / totalCost) * 100 : 0;
-                        const colors = ['bg-accent', 'bg-neutral-400', 'bg-accent', 'bg-neutral-400', 'bg-neutral-600'];
+                        const colors = ['bg-neutral-400', 'bg-neutral-500', 'bg-neutral-600', 'bg-neutral-700', 'bg-neutral-800'];
                         return (
                           <div key={item.model || index}>
                             <div className="flex items-center justify-between text-sm mb-1">
@@ -336,11 +335,11 @@ export default function Analytics() {
                   </div>
                   <div className="flex items-center gap-4 text-xs">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-sm bg-accent"></div>
+                      <div className="w-3 h-3 rounded-sm bg-neutral-400"></div>
                       <span className="text-neutral-400">Input: {formatNumber(summary.totalInputTokens)}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-sm bg-neutral-400"></div>
+                      <div className="w-3 h-3 rounded-sm bg-neutral-600"></div>
                       <span className="text-neutral-400">Output: {formatNumber(summary.totalOutputTokens)}</span>
                     </div>
                   </div>
@@ -352,86 +351,6 @@ export default function Analytics() {
                     outputTokens: 0,
                   })) || []}
                 />
-              </div>
-            </>
-          )}
-
-          {/* Performance Tab */}
-          {activeTab === 'performance' && summary && (
-            <>
-              {/* Summary Stats */}
-              <div className="grid grid-cols-4 gap-4 mb-6">
-                <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
-                  <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Avg Latency</div>
-                  <div className="text-2xl font-semibold">{formatLatency(summary.avgLatency)}</div>
-                  <div className="text-xs text-neutral-500 mt-1">{dateRangeLabel}</div>
-                </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
-                  <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">P95 Latency</div>
-                  <div className="text-2xl font-semibold">{formatLatency(summary.p95Latency)}</div>
-                  <div className="text-xs text-neutral-500 mt-1">P99: {formatLatency(summary.p95Latency * 1.3)}</div>
-                </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
-                  <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Error Rate</div>
-                  <div className="text-2xl font-semibold">{summary.errorRate.toFixed(1)}%</div>
-                  <div className="text-xs text-error/70 mt-1">{formatNumber(summary.errorCount)} errors</div>
-                </div>
-                <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
-                  <div className="text-xs text-neutral-500 uppercase tracking-wide mb-2">Total Requests</div>
-                  <div className="text-2xl font-semibold">{formatNumber(summary.totalRequests)}</div>
-                  <div className="text-xs text-neutral-500 mt-1">{formatNumber(summary.totalRequests / calculateDays(dateRange))}/day avg</div>
-                </div>
-              </div>
-
-              {/* Latency Over Time Chart Placeholder */}
-              <div className="bg-neutral-900 border border-neutral-800 rounded p-4 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="text-sm font-medium">Latency Over Time</h3>
-                    <p className="text-xs text-neutral-500 mt-0.5">P50, P95, P99 percentiles</p>
-                  </div>
-                </div>
-                <div className="h-[280px] flex items-center justify-center text-neutral-500 border border-dashed border-neutral-800 rounded">
-                  <p className="text-sm">Chart will be implemented with recharts</p>
-                </div>
-              </div>
-
-              {/* Performance by Provider */}
-              <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
-                <h3 className="text-sm font-medium mb-4">Performance by Provider</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-neutral-800">
-                        <th className="text-left py-2 px-3 text-xs font-medium text-neutral-500">Provider</th>
-                        <th className="text-left py-2 px-3 text-xs font-medium text-neutral-500">Requests</th>
-                        <th className="text-left py-2 px-3 text-xs font-medium text-neutral-500">Avg Latency</th>
-                        <th className="text-left py-2 px-3 text-xs font-medium text-neutral-500">Error Rate</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {analytics?.costByProvider && analytics.costByProvider.length > 0 ? (
-                        analytics.costByProvider.map((item, index) => {
-                          const errorRate = item.requests > 0 ? (0 / item.requests) * 100 : 0; // CostByProvider doesn't include error_count
-                          return (
-                            <tr key={item.provider || index} className="border-b border-neutral-800">
-                              <td className="py-3 px-3">
-                                <span className="text-xs px-1.5 py-0.5 bg-neutral-800 text-neutral-400 rounded capitalize">{item.provider || 'Unknown'}</span>
-                              </td>
-                              <td className="py-3 px-3 text-sm">{formatNumber(item.requests)}</td>
-                              <td className="py-3 px-3 text-sm">N/A</td>
-                              <td className={`py-3 px-3 text-sm ${errorRate > 2 ? 'text-error/80' : 'text-success'}`}>{errorRate.toFixed(1)}%</td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan={4} className="py-6 text-center text-sm text-neutral-500">No data available</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
               </div>
             </>
           )}
@@ -465,7 +384,7 @@ export default function Analytics() {
                             <tr key={item.model || index} className="border-b border-neutral-800 hover:bg-neutral-850">
                               <td className="py-3 px-3 text-sm font-medium">{item.model || 'Unknown'}</td>
                               <td className="py-3 px-3 text-sm">{formatNumber(item.requests)}</td>
-                              <td className="py-3 px-3 text-sm font-medium text-accent">{formatCurrency(item.costCents / 100)}</td>
+                              <td className="py-3 px-3 text-sm font-medium text-white">{formatCurrency(item.costCents / 100)}</td>
                               <td className="py-3 px-3 text-sm">{formatCurrency(costPerReq)}</td>
                               <td className="py-3 px-3 text-sm">{formatLatency(item.avgLatency)}</td>
                               <td className={`py-3 px-3 text-sm ${errorRate > 2 ? 'text-error/80' : 'text-success'}`}>{errorRate.toFixed(1)}%</td>
@@ -487,7 +406,7 @@ export default function Analytics() {
                 <div className="grid grid-cols-3 gap-4">
                   <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-1.5 bg-accent/10 rounded">
+                      <div className="p-1.5 bg-neutral-800 rounded">
                         <TrendUpIcon />
                       </div>
                       <span className="text-xs text-neutral-500 uppercase tracking-wide">Most Cost Efficient</span>
@@ -510,7 +429,7 @@ export default function Analytics() {
                   </div>
                   <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-1.5 bg-success/10 rounded">
+                      <div className="p-1.5 bg-neutral-800 rounded">
                         <ClockIcon />
                       </div>
                       <span className="text-xs text-neutral-500 uppercase tracking-wide">Fastest</span>
@@ -528,7 +447,7 @@ export default function Analytics() {
                   </div>
                   <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="p-1.5 bg-success/10 rounded">
+                      <div className="p-1.5 bg-neutral-800 rounded">
                         <CheckCircleIcon />
                       </div>
                       <span className="text-xs text-neutral-500 uppercase tracking-wide">Most Reliable</span>

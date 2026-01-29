@@ -44,13 +44,13 @@ function formatTokens(input?: number, output?: number): { input: string; output:
 function getProviderColor(provider: string): string {
   switch (provider) {
     case 'openai':
-      return 'bg-emerald-500/10 text-emerald-400';
+      return 'bg-emerald-500/5 text-emerald-400/70';
     case 'anthropic':
-      return 'bg-orange-500/10 text-orange-400';
+      return 'bg-orange-500/5 text-orange-400/70';
     case 'openrouter':
-      return 'bg-violet-500/10 text-violet-400';
+      return 'bg-violet-500/5 text-violet-400/70';
     default:
-      return 'bg-neutral-500/10 text-neutral-400';
+      return 'bg-neutral-500/5 text-neutral-400';
   }
 }
 
@@ -83,12 +83,12 @@ export function RecentTracesTable({ traces, loading }: RecentTracesTableProps) {
     <div className="bg-neutral-900 border border-neutral-800 rounded-lg overflow-hidden">
       <div className="flex items-center justify-between p-4 border-b border-neutral-800">
         <div className="flex items-center gap-2">
-          <div className="w-1 h-4 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-full"></div>
+          <div className="w-1 h-4 bg-neutral-700 rounded-full"></div>
           <span className="text-sm font-medium">Recent Traces</span>
         </div>
         <button
           onClick={() => navigate('/traces')}
-          className="text-xs text-cyan-400 hover:text-cyan-300"
+          className="text-xs text-neutral-400 hover:text-neutral-300"
         >
           View all
         </button>
@@ -138,7 +138,7 @@ export function RecentTracesTable({ traces, loading }: RecentTracesTableProps) {
                     className={`border-b border-neutral-800 cursor-pointer hover:bg-neutral-850 transition-colors ${isError ? 'bg-rose-500/5' : ''}`}
                   >
                     <td className="py-2.5 px-4">
-                      <span className="text-sm font-mono text-cyan-400 hover:text-cyan-300">
+                      <span className="text-sm font-mono text-neutral-400">
                         {truncateTraceId(trace.traceId)}
                       </span>
                     </td>
@@ -155,18 +155,18 @@ export function RecentTracesTable({ traces, loading }: RecentTracesTableProps) {
                     </td>
                     <td className="py-2.5 px-4">
                       <span className="text-sm">
-                        <span className="text-purple-400">{tokens.input}</span>
+                        <span className="text-neutral-300">{tokens.input}</span>
                         <span className="text-neutral-600 mx-1">/</span>
-                        <span className="text-purple-400/60">{tokens.output}</span>
+                        <span className="text-neutral-500">{tokens.output}</span>
                       </span>
                     </td>
                     <td className="py-2.5 px-4">
-                      <span className={`text-sm ${trace.latencyMs > 2000 ? 'text-amber-400' : 'text-emerald-400'}`}>
+                      <span className="text-sm text-neutral-300">
                         {formatLatency(trace.latencyMs)}
                       </span>
                     </td>
                     <td className="py-2.5 px-4">
-                      <span className="text-sm text-emerald-400">{formatCost(trace.costCents)}</span>
+                      <span className="text-sm text-neutral-300">{formatCost(trace.costCents)}</span>
                     </td>
                     <td className="py-2.5 px-4">
                       {isError ? (

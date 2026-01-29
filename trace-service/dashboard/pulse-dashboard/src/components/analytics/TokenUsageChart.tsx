@@ -111,13 +111,13 @@ export default function TokenUsageChart({ data }: TokenUsageChartProps) {
           <Bar
             dataKey="Input Tokens"
             stackId="tokens"
-            fill="#3b82f6"
+            fill="#34d399"
             radius={[0, 0, 0, 0]}
           />
           <Bar
             dataKey="Output Tokens"
             stackId="tokens"
-            fill="#737373"
+            fill="#fb923c"
             radius={[4, 4, 0, 0]}
           />
         </BarChart>

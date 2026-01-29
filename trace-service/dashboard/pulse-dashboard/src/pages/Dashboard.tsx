@@ -4,6 +4,8 @@ import { TimeRangeTabs } from '../components/dashboard/TimeRangeTabs';
 import type { TimeRange } from '../components/dashboard/TimeRangeTabs';
 import { RecentTracesTable } from '../components/dashboard/RecentTracesTable';
 import { LoadingSpinner } from '../components/ui/LoadingSpinner';
+import ProviderSplitChart from '../components/analytics/ProviderSplitChart';
+import CostChart from '../components/analytics/CostChart';
 import { getAnalytics, getTraces } from '../lib/apiClient';
 import type { AnalyticsResponse, Trace } from '../lib/apiClient';
 
@@ -38,13 +40,17 @@ const RefreshIcon = () => (
   </svg>
 );
 
-interface DashboardStats {
-  totalRequests: number;
-  totalCost: number;
-  avgLatency: number;
-  errorRate: number;
-  errorCount: number;
-}
+const TokensIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+  </svg>
+);
+
+const SessionsIcon = () => (
+  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+  </svg>
+);
 
 function getDateRange(range: TimeRange): { date_from: string; date_to: string } {
   const now = new Date();
@@ -64,18 +70,6 @@ function getDateRange(range: TimeRange): { date_from: string; date_to: string } 
   }
 
   return { date_from: from.toISOString(), date_to: to };
-}
-
-function calculateStats(analytics: AnalyticsResponse): DashboardStats {
-  const errorCount = Math.round(analytics.totalRequests * (analytics.errorRate / 100));
-
-  return {
-    totalRequests: analytics.totalRequests,
-    totalCost: analytics.totalCost,
-    avgLatency: analytics.avgLatency,
-    errorRate: analytics.errorRate,
-    errorCount,
-  };
 }
 
 function formatNumber(num: number): string {
@@ -104,7 +98,7 @@ function formatLatency(ms: number): string {
 
 export default function Dashboard() {
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
-  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [analytics, setAnalytics] = useState<AnalyticsResponse | null>(null);
   const [recentTraces, setRecentTraces] = useState<Trace[]>([]);
   const [loading, setLoading] = useState(true);
   const [tracesLoading, setTracesLoading] = useState(true);
@@ -116,8 +110,7 @@ export default function Dashboard() {
     try {
       const { date_from, date_to } = getDateRange(timeRange);
       const response = await getAnalytics({ date_from, date_to, group_by: 'day' });
-      const calculatedStats = calculateStats(response);
-      setStats(calculatedStats);
+      setAnalytics(response);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load analytics');
     } finally {
@@ -195,37 +188,103 @@ export default function Dashboard() {
           <div className="grid grid-cols-4 gap-4 mb-6">
             <StatCard
               label="Total Cost"
-              value={stats ? formatCost(stats.totalCost) : '--'}
+              value={analytics ? formatCost(analytics.totalCost) : '--'}
               icon={<DollarIcon />}
               color="emerald"
               subtitle={`${timeRange} period`}
             />
             <StatCard
               label="Requests"
-              value={stats ? formatNumber(stats.totalRequests) : '--'}
+              value={analytics ? formatNumber(analytics.totalRequests) : '--'}
               icon={<BoltIcon />}
               color="blue"
               subtitle={`${timeRange} period`}
             />
             <StatCard
               label="Avg Latency"
-              value={stats ? formatLatency(stats.avgLatency) : '--'}
+              value={analytics ? formatLatency(analytics.avgLatency) : '--'}
               icon={<ClockIcon />}
               color="amber"
               subtitle={`${timeRange} period`}
             />
             <StatCard
               label="Error Rate"
-              value={stats ? stats.errorRate.toFixed(1) + '%' : '--'}
+              value={analytics ? analytics.errorRate.toFixed(1) + '%' : '--'}
               icon={<AlertIcon />}
               color="rose"
-              subtitle={stats ? `${stats.errorCount} failed` : `${timeRange} period`}
+              subtitle={analytics ? `${Math.round(analytics.totalRequests * (analytics.errorRate / 100))} failed` : `${timeRange} period`}
             />
           </div>
 
-          {loading && !stats && (
+          {/* Second Stats Row */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            <StatCard
+              label="Sessions"
+              value={analytics ? formatNumber(analytics.totalSessions) : '--'}
+              icon={<SessionsIcon />}
+              color="purple"
+              subtitle={`${timeRange} period`}
+            />
+            <StatCard
+              label="Tokens"
+              value={analytics ? formatNumber(analytics.totalTokens.input + analytics.totalTokens.output) : '--'}
+              icon={<TokensIcon />}
+              color="purple"
+              subtitle={`${analytics ? formatNumber(analytics.totalTokens.input) : '0'} in / ${analytics ? formatNumber(analytics.totalTokens.output) : '0'} out`}
+            />
+            <StatCard
+              label="Cost/Request"
+              value={analytics ? '$' + analytics.computed.costPerRequest.toFixed(4) : '--'}
+              icon={<DollarIcon />}
+              color="cyan"
+              subtitle={`${timeRange} period`}
+            />
+            <StatCard
+              label="Tokens/Request"
+              value={analytics ? Math.round(analytics.computed.tokensPerRequest).toLocaleString() : '--'}
+              icon={<TokensIcon />}
+              color="indigo"
+              subtitle={`${timeRange} period`}
+            />
+          </div>
+
+          {loading && !analytics && (
             <div className="flex items-center justify-center py-12">
               <LoadingSpinner text="Loading analytics..." />
+            </div>
+          )}
+
+          {/* Charts Row */}
+          {analytics && (
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {/* Cost Over Time Chart */}
+              <div className="col-span-2 bg-neutral-900 border border-neutral-800 rounded p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-sm font-medium">Cost Over Time</h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">Daily spending by provider</p>
+                  </div>
+                </div>
+                <CostChart
+                  data={analytics.costOverTime.map(d => ({
+                    period: d.period,
+                    cost: d.costCents / 100,
+                    provider: d.provider,
+                  }))}
+                  groupBy="day"
+                />
+              </div>
+
+              {/* Provider Split */}
+              <div className="bg-neutral-900 border border-neutral-800 rounded p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-sm font-medium">By Provider</h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">Cost distribution</p>
+                  </div>
+                </div>
+                <ProviderSplitChart data={analytics.costByProvider} />
+              </div>
             </div>
           )}
 

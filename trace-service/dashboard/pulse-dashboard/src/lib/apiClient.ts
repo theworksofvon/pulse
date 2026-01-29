@@ -96,12 +96,6 @@ export interface LatencyBucket {
   count: number;
 }
 
-export interface LatencyPercentiles {
-  p50: number;
-  p95: number;
-  p99: number;
-}
-
 export interface TotalTokens {
   input: number;
   output: number;
@@ -127,8 +121,6 @@ export interface AnalyticsResponse {
   costOverTime: CostOverTimeByProvider[];
   costByProvider: CostByProvider[];
   topModels: StatsByModel[];
-  latencyDistribution: LatencyBucket[];
-  latencyPercentiles: LatencyPercentiles;
   computed: ComputedMetrics;
 }
 

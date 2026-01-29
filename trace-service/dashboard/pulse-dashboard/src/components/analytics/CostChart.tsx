@@ -62,10 +62,10 @@ function groupDataByProvider(data: CostDataPoint[]): { periods: string[]; series
 }
 
 const PROVIDER_COLORS: Record<string, string> = {
-  openai: '#3b82f6', // accent blue
-  anthropic: '#737373', // neutral-400
-  openrouter: '#3d3d3d', // neutral-600
-  Unknown: '#525252', // neutral-500
+  openai: '#34d399',     // emerald-400
+  anthropic: '#fb923c',  // orange-400
+  openrouter: '#a78bfa', // violet-400
+  Unknown: '#737373',    // neutral-400
 };
 
 function getProviderColor(provider: string): string {
@@ -190,17 +190,17 @@ export default function CostChart({ data, groupBy = 'day' }: CostChartProps) {
           <Tooltip content={<CustomTooltip />} />
           <defs>
             <linearGradient id="costGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.1} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+              <stop offset="5%" stopColor="#34d399" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#34d399" stopOpacity={0} />
             </linearGradient>
           </defs>
           <Line
             type="monotone"
             dataKey="cost"
-            stroke="#3b82f6"
+            stroke="#34d399"
             strokeWidth={1.5}
             dot={false}
-            activeDot={{ r: 4, fill: '#3b82f6' }}
+            activeDot={{ r: 4, fill: '#34d399' }}
             fill="url(#costGradient)"
           />
         </LineChart>
