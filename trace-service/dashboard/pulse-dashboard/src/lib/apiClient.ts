@@ -210,3 +210,17 @@ export const deleteApiKey = async (keyId: string): Promise<{ success: boolean }>
   });
   return handleResponse<{ success: boolean }>(response);
 };
+
+export interface LoginResponse {
+  authenticated: boolean;
+}
+
+export const validateApiKey = async (apiKey: string): Promise<LoginResponse> => {
+  const response = await fetch(`${getBaseUrl()}/v1/auth/login`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+  });
+  return handleResponse<LoginResponse>(response);
+};

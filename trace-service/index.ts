@@ -10,6 +10,7 @@ import { handleCreateProject, handleGetApiKeys, handleDeleteApiKey } from "./rou
 import { handleBatchTraces, getTraces, getTraceById } from "./routes/traces";
 import { handleGetSessionTraces } from "./routes/sessions";
 import { handleGetAnalytics } from "./routes/analytics";
+import { isAuthenticated } from "./routes/auth";
 import { registerShutdownHandlers, setServer, setDbCleanup } from "./shutdown";
 
 const app = new Hono();
@@ -21,8 +22,7 @@ app.get("/health", (c) => {
   return c.json({ status: "ok", service: "pulse" });
 });
 
-app.use("/dashboard/*", serveStatic({ root: "./static", rewriteRequestPath: (path) => path.replace(/^\/dashboard/, "") }));
-app.get("/dashboard", serveStatic({ path: "./static/index.html" }));
+app.post("/v1/auth/login", isAuthenticated);
 
 app.post("/admin/projects", adminAuthMiddleware, handleCreateProject);
 app.get("/admin/api-keys", authMiddleware, handleGetApiKeys);
@@ -33,6 +33,12 @@ app.get("/v1/traces", authMiddleware, getTraces);
 app.get("/v1/traces/:id", authMiddleware, getTraceById);
 app.get("/v1/sessions/:id", authMiddleware, handleGetSessionTraces);
 app.get("/v1/analytics", authMiddleware, handleGetAnalytics);
+
+// Serve static assets (JS, CSS, images, etc.)
+app.use("/assets/*", serveStatic({ root: "./static" }));
+
+// SPA fallback - serve index.html for all other GET requests
+app.get("*", serveStatic({ path: "./static/index.html" }));
 
 const server = Bun.serve({
   fetch: app.fetch,

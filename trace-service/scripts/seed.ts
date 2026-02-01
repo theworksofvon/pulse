@@ -5,7 +5,7 @@ import { hashApiKey } from "../auth/queries";
 
 // Configuration
 const CONFIG = {
-  numSessions: 500,
+  numSessions: 1000,
   tracesPerSession: { min: 50, max: 100 },
   // Date range: last 30 days
   dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),

@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { validateApiKey } from '../lib/apiClient';
 
 export default function Login() {
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -14,17 +16,30 @@ export default function Login() {
     return null;
   }
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (!apiKey.trim()) {
+    const trimmedKey = apiKey.trim();
+    if (!trimmedKey) {
       setError('Please enter your API key');
       return;
     }
 
-    login(apiKey.trim());
-    navigate('/');
+    setIsLoading(true);
+    try {
+      const response = await validateApiKey(trimmedKey);
+      if (response.authenticated) {
+        login(trimmedKey);
+        navigate('/');
+      } else {
+        setError('Invalid API key. Please check your key and try again.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to validate API key. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -58,7 +73,8 @@ export default function Login() {
                   type="password"
                   value={apiKey}
                   onChange={(e) => setApiKey(e.target.value)}
-                  className="w-full px-3 py-2 bg-neutral-850 border border-neutral-700 rounded-lg text-sm focus:border-accent focus:outline-none transition-colors"
+                  disabled={isLoading}
+                  className="w-full px-3 py-2 bg-neutral-850 border border-neutral-700 rounded-lg text-sm focus:border-accent focus:outline-none transition-colors disabled:opacity-50"
                   placeholder="pulse_sk_..."
                   autoFocus
                 />
@@ -74,9 +90,10 @@ export default function Login() {
               {/* Submit */}
               <button
                 type="submit"
-                className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-accent hover:bg-blue-600 transition-colors"
+                disabled={isLoading}
+                className="w-full py-2.5 rounded-lg text-sm font-medium text-white bg-accent hover:bg-blue-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Start monitoring
+                {isLoading ? 'Validating...' : 'Start monitoring'}
               </button>
             </div>
           </form>
