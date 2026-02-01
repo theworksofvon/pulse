@@ -36,6 +36,10 @@ export default function FilterSidebar({ filters, onApplyFilters, onClearFilters 
             <option value="openai">OpenAI</option>
             <option value="anthropic">Anthropic</option>
             <option value="openrouter">OpenRouter</option>
+            <option value="google">Google</option>
+            <option value="meta">Meta</option>
+            <option value="mistral">Mistral</option>
+            <option value="cohere">Cohere</option>
           </select>
         </div>
 

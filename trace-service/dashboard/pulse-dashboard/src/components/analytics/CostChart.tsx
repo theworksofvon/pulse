@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { getProviderColor } from '../../lib/providerUtils';
 
 export interface CostDataPoint {
   period: string;
@@ -59,17 +60,6 @@ function groupDataByProvider(data: CostDataPoint[]): { periods: string[]; series
   }
 
   return { periods, series };
-}
-
-const PROVIDER_COLORS: Record<string, string> = {
-  openai: '#34d399',     // emerald-400
-  anthropic: '#fb923c',  // orange-400
-  openrouter: '#a78bfa', // violet-400
-  Unknown: '#737373',    // neutral-400
-};
-
-function getProviderColor(provider: string): string {
-  return PROVIDER_COLORS[provider.toLowerCase()] || PROVIDER_COLORS.Unknown;
 }
 
 // Custom tooltip component

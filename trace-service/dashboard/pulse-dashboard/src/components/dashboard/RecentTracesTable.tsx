@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import type { Trace } from '../../lib/apiClient';
+import { getProviderBadgeClasses, getProviderLabel } from '../../lib/providerUtils';
 
 interface RecentTracesTableProps {
   traces: Trace[];
@@ -41,30 +42,9 @@ function formatTokens(input?: number, output?: number): { input: string; output:
   return { input: formatNum(input), output: formatNum(output) };
 }
 
-function getProviderColor(provider: string): string {
-  switch (provider) {
-    case 'openai':
-      return 'bg-emerald-500/5 text-emerald-400/70';
-    case 'anthropic':
-      return 'bg-orange-500/5 text-orange-400/70';
-    case 'openrouter':
-      return 'bg-violet-500/5 text-violet-400/70';
-    default:
-      return 'bg-neutral-500/5 text-neutral-400';
-  }
-}
-
-function getProviderLabel(provider: string): string {
-  switch (provider) {
-    case 'openai':
-      return 'OpenAI';
-    case 'anthropic':
-      return 'Anthropic';
-    case 'openrouter':
-      return 'OpenRouter';
-    default:
-      return provider;
-  }
+function getProviderBadgeColor(provider: string): string {
+  const { bg, text } = getProviderBadgeClasses(provider);
+  return `${bg} ${text}`;
 }
 
 function truncateTraceId(traceId: string): string {
@@ -146,7 +126,7 @@ export function RecentTracesTable({ traces, loading }: RecentTracesTableProps) {
                       <span className="text-sm text-neutral-500">{formatTimeAgo(trace.timestamp)}</span>
                     </td>
                     <td className="py-2.5 px-4">
-                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${getProviderColor(trace.provider)}`}>
+                      <span className={`text-xs px-1.5 py-0.5 rounded font-medium ${getProviderBadgeColor(trace.provider)}`}>
                         {getProviderLabel(trace.provider)}
                       </span>
                     </td>

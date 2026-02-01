@@ -36,7 +36,7 @@ export interface GetTracesParams {
 export interface Trace {
   traceId: string;
   timestamp: string;
-  provider: 'openai' | 'anthropic' | 'openrouter';
+  provider: string;
   modelRequested: string;
   modelUsed: string;
   latencyMs: number;
