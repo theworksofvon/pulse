@@ -7,6 +7,25 @@ import {
   cleanupTestData,
 } from "./setup";
 
+interface Trace {
+  traceId: string;
+  provider: string;
+  modelRequested: string;
+  status: string;
+  [key: string]: unknown;
+}
+
+interface TracesResponse {
+  traces: Trace[];
+  total: number;
+  limit: number;
+  offset: number;
+}
+
+interface BatchResponse {
+  count: number;
+}
+
 describe("Traces Endpoints", () => {
   let testProject: { id: string; apiKey: string };
   let traceIds: string[];
@@ -27,7 +46,7 @@ describe("Traces Endpoints", () => {
   describe("GET /v1/traces", () => {
     test("returns traces for authenticated project", async () => {
       const response = await authFetch("/v1/traces", testProject.apiKey);
-      const data = await response.json();
+      const data = (await response.json()) as TracesResponse;
 
       expect(response.status).toBe(200);
       expect(data).toHaveProperty("traces");
@@ -38,7 +57,7 @@ describe("Traces Endpoints", () => {
 
     test("respects limit parameter", async () => {
       const response = await authFetch("/v1/traces?limit=5", testProject.apiKey);
-      const data = await response.json();
+      const data = (await response.json()) as TracesResponse;
 
       expect(response.status).toBe(200);
       expect(data.traces.length).toBe(5);
@@ -50,7 +69,7 @@ describe("Traces Endpoints", () => {
         "/v1/traces?limit=5&offset=5",
         testProject.apiKey
       );
-      const data = await response.json();
+      const data = (await response.json()) as TracesResponse;
 
       expect(response.status).toBe(200);
       expect(data.traces.length).toBe(5);
@@ -62,10 +81,10 @@ describe("Traces Endpoints", () => {
         "/v1/traces?provider=openai",
         testProject.apiKey
       );
-      const data = await response.json();
+      const data = (await response.json()) as TracesResponse;
 
       expect(response.status).toBe(200);
-      data.traces.forEach((trace: any) => {
+      data.traces.forEach((trace) => {
         expect(trace.provider).toBe("openai");
       });
     });
@@ -75,11 +94,11 @@ describe("Traces Endpoints", () => {
         "/v1/traces?status=error",
         testProject.apiKey
       );
-      const data = await response.json();
+      const data = (await response.json()) as TracesResponse;
 
       expect(response.status).toBe(200);
       expect(data.traces.length).toBeGreaterThan(0);
-      data.traces.forEach((trace: any) => {
+      data.traces.forEach((trace) => {
         expect(trace.status).toBe("error");
       });
     });
@@ -99,12 +118,12 @@ describe("Traces Endpoints", () => {
 
   describe("GET /v1/traces/:id", () => {
     test("returns single trace by id", async () => {
-      const traceId = traceIds[0];
+      const traceId = traceIds[0] ?? "";
       const response = await authFetch(
         `/v1/traces/${traceId}`,
         testProject.apiKey
       );
-      const data = await response.json();
+      const data = (await response.json()) as Trace;
 
       expect(response.status).toBe(200);
       expect(data.traceId).toBe(traceId);
@@ -155,7 +174,7 @@ describe("Traces Endpoints", () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(batchData),
       });
-      const data = await response.json();
+      const data = (await response.json()) as BatchResponse;
 
       expect(response.status).toBe(202);
       expect(data.count).toBe(2);
