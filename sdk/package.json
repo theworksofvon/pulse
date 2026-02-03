@@ -14,7 +14,8 @@
   },
   "scripts": {
     "build": "bun build src/index.ts --outdir dist --target node",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "create-api-key": "bun run scripts/create-api-key.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

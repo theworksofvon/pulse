@@ -30,6 +30,36 @@ const response = await openai.chat.completions.create({
 });
 ```
 
+## Creating API Keys for Local Testing
+
+The SDK needs a `pulse_sk_…` API key issued by your local trace-service admin endpoint.
+
+1. Start the trace-service (for example via `make sdk-test-e2e`, which launches the docker stack on port 3000).
+2. Export the admin key that service expects (the docker compose stack uses `test-admin-key` by default).
+3. Run the helper target to create a project + key:
+
+```bash
+cd /Users/davontaejackson/dev/pulse
+ADMIN_KEY=test-admin-key \
+PROJECT_NAME="Pulse SDK Dev" \
+make sdk-create-api-key
+```
+
+This calls `sdk/scripts/create-api-key.ts`, which POSTs to `TRACE_SERVICE_URL` (default `http://localhost:3000/admin/projects`) and prints the project ID plus plaintext key. You can also invoke the script directly:
+
+```bash
+cd /Users/davontaejackson/dev/pulse/sdk
+ADMIN_KEY=test-admin-key TRACE_SERVICE_URL=http://localhost:3000 \
+bun run scripts/create-api-key.ts "Pulse SDK Dev"
+```
+
+Copy the resulting key into `PULSE_API_KEY` before running the SDK or e2e tests.
+
+### Default Local URLs
+
+- `TRACE_SERVICE_URL` defaults to `http://localhost:3000`.
+- `TEST_SERVER_URL` defaults to `http://localhost:3001` when you run `bun run tests/test-server.ts` locally. Adjust `TEST_SERVER_PORT` if you need a different port.
+
 ## Supported Providers
 
 ### OpenAI
