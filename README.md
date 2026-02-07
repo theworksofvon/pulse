@@ -7,7 +7,7 @@ Observability for LLM applications. Think Grafana, but for prompts.
 Pulse captures every LLM call your application makes—prompts, responses, latency, cost, tokens—and gives you tools to understand what's happening.
 
 - **Trace explorer**: Browse and search all your LLM calls
-- **Session tracking**: Group related calls (conversations, agent runs)
+- **Session tracking**: Group related calls (conversations, agent runs) *****
 - **Experiments**: A/B test prompts and models, compare results side by side
 - **Evals**: Score outputs with heuristics or LLM-as-judge
 - **Dashboards**: Track cost, latency, and quality over time
@@ -74,6 +74,8 @@ const openai = observe(new OpenAI());
 
 // All calls are now tracked
 await openai.chat.completions.create({ ... });
+
+// if we can pass etc params to create then we can pass session id then keep it on our end ??
 ```
 
 ## Status

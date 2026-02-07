@@ -85,14 +85,7 @@ export function Sidebar() {
     <aside className="w-56 h-full border-r border-neutral-800 flex flex-col flex-shrink-0">
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-neutral-800">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-          </div>
-          <span className="font-semibold text-sm bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">Pulse</span>
-        </div>
+        <span className="font-semibold text-sm text-neutral-100">Pulse</span>
       </div>
 
       {/* Project Selector */}

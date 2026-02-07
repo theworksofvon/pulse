@@ -32,7 +32,9 @@ describe("Traces Endpoints", () => {
 
   beforeAll(async () => {
     console.log("[traces.test] Setting up test project...");
-    testProject = await createTestProject("Traces Test Project");
+    // Just a test project we can use to build on and for frontend
+    testProject = { id: "d051a8e8-4bcd-4a5f-b3e5-a02b82c55e5d", apiKey: "pulse_sk_c6af7988-7127-4f56-946a-5761eb5ef91a"}
+    // testProject = await createTestProject("Traces Test Project");
     console.log(`[traces.test] Created project: ${testProject.id}`);
     traceIds = await createTestTraces(testProject.id, 15);
     console.log(`[traces.test] Created ${traceIds.length} test traces`);
