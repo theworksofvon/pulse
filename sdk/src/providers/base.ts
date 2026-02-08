@@ -19,6 +19,36 @@ export interface TraceMetadata {
 }
 
 /**
+ * Extracts and strips pulse-prefixed params from a request body
+ */
+export function extractPulseParams(
+  body: Record<string, unknown>
+): { cleanBody: Record<string, unknown>; pulseSessionId?: string; pulseMetadata?: Record<string, unknown> } {
+  const { pulseSessionId, pulseMetadata, ...cleanBody } = body;
+  return {
+    cleanBody,
+    pulseSessionId: pulseSessionId as string | undefined,
+    pulseMetadata: pulseMetadata as Record<string, unknown> | undefined,
+  };
+}
+
+/**
+ * Merges observe-level and per-call metadata (per-call wins)
+ */
+export function resolveTraceMetadata(
+  observeOptions?: TraceMetadata,
+  pulseSessionId?: string,
+  pulseMetadata?: Record<string, unknown>
+): TraceMetadata {
+  return {
+    sessionId: pulseSessionId ?? observeOptions?.sessionId,
+    metadata: pulseMetadata
+      ? { ...observeOptions?.metadata, ...pulseMetadata }
+      : observeOptions?.metadata,
+  };
+}
+
+/**
  * Calculates elapsed time in milliseconds from a start timestamp
  *
  * @param startTime - High-resolution timestamp from performance.now() or Date.now()

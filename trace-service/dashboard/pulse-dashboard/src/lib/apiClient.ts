@@ -59,7 +59,7 @@ export interface TracesResponse {
 }
 
 export interface Session {
-  session_id: string;
+  sessionId: string;
   traces: Trace[];
 }
 

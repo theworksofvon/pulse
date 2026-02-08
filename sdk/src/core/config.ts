@@ -1,13 +1,5 @@
-/**
- * SDK configuration module
- * Validates and merges user config with defaults
- */
-
 import type { PulseConfig } from '../types';
 
-/**
- * Internal resolved configuration with all defaults applied
- */
 export interface ResolvedConfig {
   apiKey: string;
   apiUrl: string;
@@ -16,23 +8,13 @@ export interface ResolvedConfig {
   enabled: boolean;
 }
 
-/**
- * Default configuration values
- */
-const defaults = {
+export const defaults = {
   apiUrl: 'http://localhost:3000',
   batchSize: 10,
   flushInterval: 5000,
   enabled: true,
 } as const;
 
-/**
- * Validates and merges user configuration with defaults.
- * Throws if required fields are missing or invalid.
- *
- * @param config - User-provided configuration
- * @returns Resolved configuration with all defaults applied
- */
 export function loadConfig(config: PulseConfig): ResolvedConfig {
   if (!config.apiKey) {
     throw new Error('Pulse SDK: apiKey is required');

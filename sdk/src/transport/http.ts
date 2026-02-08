@@ -1,13 +1,8 @@
-/**
- * HTTP transport module
- * Sends traces to the Pulse server via HTTP
- */
-
 import type { Trace } from '../types';
 
 /**
  * Send a batch of traces to the Pulse server.
- * Handles network errors gracefully by logging them without throwing.
+ * Handles network errors by logging them without throwing.
  *
  * @param apiUrl - Pulse server base URL
  * @param apiKey - API key for authentication
@@ -41,7 +36,6 @@ export async function sendTraces(
       );
     }
   } catch (error) {
-    // Log network errors but don't throw - tracing should not break the app
     console.error('Pulse SDK: network error sending traces:', error);
   }
 }

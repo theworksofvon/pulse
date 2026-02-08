@@ -116,14 +116,18 @@ export class PostgresStorage implements StorageAdapter {
     projectId: string,
     session: NewSession
   ): Promise<Session> {
-    const result = await this.db
+    const insert = this.db
       .insert(sessions)
-      .values({ ...session, projectId })
-      .onConflictDoUpdate({
-        target: sessions.id,
-        set: { metadata: session.metadata },
-      })
-      .returning();
+      .values({ ...session, projectId });
+
+    const withConflict = session.metadata !== undefined
+      ? insert.onConflictDoUpdate({
+          target: sessions.id,
+          set: { metadata: session.metadata },
+        })
+      : insert.onConflictDoNothing({ target: sessions.id });
+
+    const result = await withConflict.returning();
     return result[0]!;
   }
 

@@ -20,9 +20,9 @@ import type {
   TextBlock,
   Usage,
 } from '@anthropic-ai/sdk/resources/messages';
-import type { ObserveOptions, NormalizedResponse } from '../types';
+import { Provider, type ObserveOptions, type NormalizedResponse } from '../types';
 import { normalizeAnthropicResponse } from '../lib/normalize';
-import { buildTrace, buildErrorTrace, getStartTime, calculateElapsedTime, type TraceMetadata } from './base';
+import { buildTrace, buildErrorTrace, getStartTime, calculateElapsedTime, extractPulseParams, resolveTraceMetadata, type TraceMetadata } from './base';
 import { addToBuffer, isEnabled } from '../core/state';
 
 /**
@@ -166,7 +166,7 @@ function createTracedStream(
         traceRecorded = true;
         const latencyMs = calculateElapsedTime(startTime);
         const normalizedResponse = accumulatorToNormalizedResponse(accumulator);
-        const trace = buildTrace(requestBody, normalizedResponse, 'anthropic', latencyMs, traceMetadata);
+        const trace = buildTrace(requestBody, normalizedResponse, Provider.Anthropic, latencyMs, traceMetadata);
         addToBuffer(trace);
       }
     } catch (error) {
@@ -177,7 +177,7 @@ function createTracedStream(
         const trace = buildErrorTrace(
           requestBody,
           error instanceof Error ? error : new Error(String(error)),
-          'anthropic',
+          Provider.Anthropic,
           latencyMs,
           traceMetadata
         );
@@ -247,18 +247,20 @@ function wrapMessagesCreate(
     }
 
     const startTime = getStartTime();
-    const requestBody = body as unknown as Record<string, unknown>;
+    const { cleanBody, pulseSessionId, pulseMetadata } = extractPulseParams(body as unknown as Record<string, unknown>);
+    const requestBody = cleanBody;
     const isStreaming = 'stream' in body && body.stream === true;
 
-    const traceMetadata: TraceMetadata = {
-      sessionId: options?.sessionId,
-      metadata: options?.metadata,
-    };
+    const traceMetadata = resolveTraceMetadata(
+      { sessionId: options?.sessionId, metadata: options?.metadata },
+      pulseSessionId,
+      pulseMetadata
+    );
 
     if (isStreaming) {
       // Handle streaming response
       try {
-        const stream = await original(body as MessageCreateParamsStreaming, requestOptions);
+        const stream = await original(cleanBody as unknown as MessageCreateParamsStreaming, requestOptions);
         // Return a traced stream that captures events and builds trace on completion
         return createTracedStream(
           stream as Stream<RawMessageStreamEvent>,
@@ -274,7 +276,7 @@ function wrapMessagesCreate(
         const trace = buildErrorTrace(
           requestBody,
           error instanceof Error ? error : new Error(String(error)),
-          'anthropic',
+          Provider.Anthropic,
           latencyMs,
           traceMetadata
         );
@@ -286,7 +288,7 @@ function wrapMessagesCreate(
     } else {
       // Handle non-streaming response
       try {
-        const response = await original(body as MessageCreateParamsNonStreaming, requestOptions) as Message;
+        const response = await original(cleanBody as unknown as MessageCreateParamsNonStreaming, requestOptions) as Message;
 
         // Calculate latency
         const latencyMs = calculateElapsedTime(startTime);
@@ -295,7 +297,7 @@ function wrapMessagesCreate(
         const normalizedResponse = normalizeAnthropicResponse(response);
 
         // Build and buffer trace
-        const trace = buildTrace(requestBody, normalizedResponse, 'anthropic', latencyMs, traceMetadata);
+        const trace = buildTrace(requestBody, normalizedResponse, Provider.Anthropic, latencyMs, traceMetadata);
         addToBuffer(trace);
 
         // Return original response unchanged
@@ -308,7 +310,7 @@ function wrapMessagesCreate(
         const trace = buildErrorTrace(
           requestBody,
           error instanceof Error ? error : new Error(String(error)),
-          'anthropic',
+          Provider.Anthropic,
           latencyMs,
           traceMetadata
         );

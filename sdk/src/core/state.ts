@@ -1,36 +1,15 @@
-/**
- * SDK state management module
- * Manages configuration, trace buffer, and flush timer
- */
-
 import type { Trace } from '../types';
-import type { ResolvedConfig } from './config';
+import { defaults, type ResolvedConfig } from './config';
+import { sendTraces } from '../transport/http';
 
-/**
- * Module-level state
- */
 let config: ResolvedConfig | null = null;
 let traceBuffer: Trace[] = [];
 let flushTimer: ReturnType<typeof setInterval> | null = null;
 
-/**
- * Callback for triggering flush when buffer is full
- * Set by flush.ts to avoid circular dependency
- */
-let onBufferFull: (() => void) | null = null;
-
-/**
- * Set the SDK configuration.
- * Called by initPulse() after validation.
- */
 export function setConfig(resolvedConfig: ResolvedConfig): void {
   config = resolvedConfig;
 }
 
-/**
- * Get the current configuration.
- * Throws if SDK has not been initialized.
- */
 export function getConfig(): ResolvedConfig {
   if (!config) {
     throw new Error('Pulse SDK: not initialized. Call initPulse() first.');
@@ -38,18 +17,10 @@ export function getConfig(): ResolvedConfig {
   return config;
 }
 
-/**
- * Check if the SDK is enabled.
- * Returns false if not initialized or explicitly disabled.
- */
 export function isEnabled(): boolean {
   return config?.enabled ?? false;
 }
 
-/**
- * Add a trace to the buffer.
- * Triggers flush callback if buffer reaches configured size.
- */
 export function addToBuffer(trace: Trace): void {
   if (!isEnabled()) {
     return;
@@ -57,72 +28,60 @@ export function addToBuffer(trace: Trace): void {
 
   traceBuffer.push(trace);
 
-  const batchSize = config?.batchSize ?? 10;
-  if (traceBuffer.length >= batchSize && onBufferFull) {
-    onBufferFull();
+  const batchSize = config?.batchSize ?? defaults.batchSize;
+  if (traceBuffer.length >= batchSize) {
+    flushBuffer().catch(() => {});
   }
 }
 
-/**
- * Get current traces in buffer (for flushing).
- */
-export function getBuffer(): Trace[] {
-  return [...traceBuffer];
-}
-
-/**
- * Clear the trace buffer after successful flush.
- */
-export function clearBuffer(): void {
-  traceBuffer = [];
-}
-
-/**
- * Get buffer size.
- */
 export function getBufferSize(): number {
   return traceBuffer.length;
 }
 
-/**
- * Set the flush timer reference.
- */
-export function setFlushTimer(timer: ReturnType<typeof setInterval>): void {
-  flushTimer = timer;
+export async function flushBuffer(): Promise<void> {
+  if (!isEnabled()) {
+    return;
+  }
+
+  const traces = [...traceBuffer];
+  if (traces.length === 0) {
+    return;
+  }
+
+  const cfg = getConfig();
+
+  traceBuffer = [];
+
+  try {
+    await sendTraces(cfg.apiUrl, cfg.apiKey, traces);
+  } catch (error) {
+    console.error('Pulse SDK: failed to flush traces:', error);
+  }
 }
 
-/**
- * Get the flush timer reference.
- */
-export function getFlushTimer(): ReturnType<typeof setInterval> | null {
-  return flushTimer;
+export function startFlushInterval(): void {
+  const cfg = getConfig();
+
+  stopFlushInterval();
+
+  flushTimer = setInterval(() => {
+    flushBuffer().catch(() => {});
+  }, cfg.flushInterval);
 }
 
-/**
- * Clear the flush timer.
- */
-export function clearFlushTimer(): void {
+export function stopFlushInterval(): void {
   if (flushTimer) {
     clearInterval(flushTimer);
     flushTimer = null;
   }
 }
 
-/**
- * Register callback for when buffer is full.
- * Used by flush.ts to trigger flush without circular dependency.
- */
-export function setOnBufferFull(callback: () => void): void {
-  onBufferFull = callback;
+export function isFlushIntervalRunning(): boolean {
+  return flushTimer !== null;
 }
 
-/**
- * Reset all state.
- * Useful for testing or re-initialization.
- */
 export function resetState(): void {
   config = null;
   traceBuffer = [];
-  clearFlushTimer();
-  onBufferFull = null;
+  stopFlushInterval();
 }

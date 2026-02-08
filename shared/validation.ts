@@ -47,8 +47,8 @@ export const traceQuerySchema = z.object({
   provider: providerSchema.optional(),
   model: z.string().optional(),
   status: statusSchema.optional(),
-  date_from: z.string().datetime({ offset: true }).optional(),
-  date_to: z.string().datetime({ offset: true }).optional(),
+  date_from: z.union([z.string(), z.coerce.number()]).optional(),
+  date_to: z.union([z.string(), z.coerce.number()]).optional(),
   limit: z.coerce.number().int().min(1).max(1000).default(100),
   offset: z.coerce.number().int().min(0).default(0),
 });

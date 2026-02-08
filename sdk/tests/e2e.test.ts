@@ -27,6 +27,8 @@ interface Trace {
   outputTokens?: number;
   latencyMs: number;
   costCents?: number;
+  sessionId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 interface TracesResponse {
@@ -35,20 +37,14 @@ interface TracesResponse {
 }
 
 interface HealthResponse {
-  status: string;
-  providers: Record<ProviderName, boolean>;
+  openai: boolean;
+  anthropic: boolean;
 }
 
 interface RunResponse {
-  status: string;
-  providers: Record<ProviderName, {
-    configured: boolean;
-    invoked: boolean;
-    success: boolean;
-    error?: string;
-    model?: string;
-    responseSnippet?: string | null;
-  }>;
+  model?: string;
+  content?: string | null;
+  error?: string;
 }
 
 const TEST_SERVER_URL = process.env.TEST_SERVER_URL || "http://localhost:3001";
@@ -69,10 +65,13 @@ async function waitForTraces(ms = 2000): Promise<void> {
 /**
  * Helper to fetch traces from trace-service
  */
-async function getTraces(params: { limit?: number; provider?: string } = {}): Promise<TracesResponse> {
+async function getTraces(
+  params: { limit?: number; provider?: string; sessionId?: string } = {}
+): Promise<TracesResponse> {
   const url = new URL(`${TRACE_SERVICE_URL}/v1/traces`);
   if (params.limit) url.searchParams.set("limit", String(params.limit));
   if (params.provider) url.searchParams.set("provider", params.provider);
+  if (params.sessionId) url.searchParams.set("session_id", params.sessionId);
 
   const response = await fetch(url.toString(), {
     headers: {
@@ -90,27 +89,30 @@ async function getTraces(params: { limit?: number; provider?: string } = {}): Pr
 /**
  * Helper to check test server health and available providers
  */
-async function getTestServerHealth(): Promise<HealthResponse["providers"]> {
+async function getTestServerHealth(): Promise<HealthResponse> {
   const response = await fetch(`${TEST_SERVER_URL}/health`);
   const data = (await response.json()) as HealthResponse;
-  return data.providers;
+  return data;
 }
 
-async function triggerRun(provider: ProviderName): Promise<void> {
+async function triggerRun(
+  provider: ProviderName,
+  options: { pulseSessionId?: string; pulseMetadata?: Record<string, unknown> } = {}
+): Promise<void> {
   const response = await fetch(`${TEST_SERVER_URL}/run`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ provider }),
+    body: JSON.stringify({ provider, ...options }),
   });
 
   expect(response.ok).toBe(true);
   const data = (await response.json()) as RunResponse;
-  expect(data.status).toBe("ok");
-  expect(data.providers[provider]).toMatchObject({ configured: true, invoked: true, success: true });
+  expect(data.error).toBeUndefined();
+  expect(data.model).toBeDefined();
 }
 
 describe("E2E Integration Tests", () => {
-  let availableProviders: HealthResponse["providers"];
+  let availableProviders: HealthResponse;
 
   beforeAll(async () => {
     // Check which providers are available
@@ -205,6 +207,34 @@ describe("E2E Integration Tests", () => {
       expect(trace.modelRequested).toBeDefined();
       expect(["success", "error"]).toContain(trace.status);
       expect(typeof trace.latencyMs).toBe("number");
+    });
+  });
+
+  describe("Session Correlation", () => {
+    it("should persist the same session_id and metadata across providers", async () => {
+      if (!availableProviders.openai || !availableProviders.anthropic) {
+        console.log("Skipping: OpenAI or Anthropic not configured");
+        return;
+      }
+
+      const sessionId = crypto.randomUUID();
+      const metadata = { scenario: "session-correlation", turn: 1 };
+
+      await triggerRun("openai", { pulseSessionId: sessionId, pulseMetadata: metadata });
+      await triggerRun("anthropic", { pulseSessionId: sessionId, pulseMetadata: metadata });
+
+      await waitForTraces();
+
+      const tracesResponse = await getTraces({ sessionId, limit: 10 });
+      const traces = tracesResponse.traces.filter(
+        (trace) => trace.provider === "openai" || trace.provider === "anthropic"
+      );
+
+      expect(traces.length).toBeGreaterThanOrEqual(2);
+      for (const trace of traces) {
+        expect(trace.sessionId).toBe(sessionId);
+        expect(trace.metadata).toEqual(metadata);
+      }
     });
   });
 });

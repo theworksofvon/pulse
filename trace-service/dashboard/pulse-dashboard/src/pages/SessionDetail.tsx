@@ -241,6 +241,7 @@ export default function SessionDetail() {
     );
   }
 
+  const sessionId = session.sessionId || id || '';
   const traces = [...session.traces].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
@@ -262,8 +263,8 @@ export default function SessionDetail() {
           >
             <BackIcon />
           </button>
-          <span className="text-sm font-mono text-accent">{session.session_id}</span>
-          <CopyButton text={session.session_id} />
+          <span className="text-sm font-mono text-accent">{sessionId}</span>
+          <CopyButton text={sessionId} />
           {stats.errorCount > 0 ? (
             <span className="text-xs px-1.5 py-0.5 bg-error/10 text-error rounded">
               {stats.errorCount} Error{stats.errorCount > 1 ? 's' : ''}
@@ -273,13 +274,15 @@ export default function SessionDetail() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Link
-            to={`/traces?session_id=${session.session_id}`}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-accent hover:text-accent/80 transition-colors"
-          >
-            <ExternalLinkIcon />
-            View in Traces
-          </Link>
+          {sessionId ? (
+            <Link
+              to={`/traces?session_id=${sessionId}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-accent hover:text-accent/80 transition-colors"
+            >
+              <ExternalLinkIcon />
+              View in Traces
+            </Link>
+          ) : null}
         </div>
       </header>
 

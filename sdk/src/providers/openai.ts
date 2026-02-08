@@ -7,9 +7,9 @@
 
 import type OpenAI from 'openai';
 import type { ChatCompletion, ChatCompletionCreateParamsNonStreaming } from 'openai/resources/chat/completions';
-import type { Provider, ObserveOptions } from '../types';
+import { Provider, type ObserveOptions } from '../types';
 import { normalizeOpenAIResponse } from '../lib/normalize';
-import { buildTrace, buildErrorTrace, getStartTime, calculateElapsedTime, type TraceMetadata } from './base';
+import { buildTrace, buildErrorTrace, getStartTime, calculateElapsedTime, extractPulseParams, resolveTraceMetadata, type TraceMetadata } from './base';
 import { addToBuffer, isEnabled } from '../core/state';
 
 /**
@@ -36,16 +36,18 @@ function wrapChatCompletionCreate(
     }
 
     const startTime = getStartTime();
-    const requestBody = body as unknown as Record<string, unknown>;
+    const { cleanBody, pulseSessionId, pulseMetadata } = extractPulseParams(body as unknown as Record<string, unknown>);
+    const requestBody = cleanBody;
 
-    const traceMetadata: TraceMetadata = {
-      sessionId: options?.sessionId,
-      metadata: options?.metadata,
-    };
+    const traceMetadata = resolveTraceMetadata(
+      { sessionId: options?.sessionId, metadata: options?.metadata },
+      pulseSessionId,
+      pulseMetadata
+    );
 
     try {
-      // Call original method
-      const response = await original.call(this, body, requestOptions) as ChatCompletion;
+      // Call original method with clean body (pulse params stripped)
+      const response = await original.call(this, cleanBody as unknown as typeof body, requestOptions) as ChatCompletion;
 
       // Calculate latency
       const latencyMs = calculateElapsedTime(startTime);
@@ -79,32 +81,9 @@ function wrapChatCompletionCreate(
   } as OpenAI.Chat.Completions['create'];
 }
 
-/**
- * Patches an OpenAI client to capture traces for LLM calls
- *
- * @param client - The OpenAI client instance to patch
- * @param provider - Provider name: 'openai' for OpenAI API, 'openrouter' for OpenRouter
- * @param options - Trace options (sessionId, metadata)
- * @returns The same client instance with methods wrapped for tracing
- *
- * @example
- * ```ts
- * import OpenAI from 'openai';
- * import { patchOpenAI } from '@pulse/sdk';
- *
- * const client = new OpenAI({ apiKey: 'sk-...' });
- * patchOpenAI(client, 'openai');
- *
- * // All calls are now traced
- * const response = await client.chat.completions.create({
- *   model: 'gpt-4o',
- *   messages: [{ role: 'user', content: 'Hello!' }]
- * });
- * ```
- */
 export function patchOpenAI<T extends OpenAI>(
   client: T,
-  provider: 'openai' | 'openrouter',
+  provider: Provider.OpenAI | Provider.OpenRouter,
   options?: ObserveOptions
 ): T {
   // Store original method

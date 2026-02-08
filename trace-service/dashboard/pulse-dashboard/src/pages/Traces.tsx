@@ -33,6 +33,14 @@ const defaultFilters: TracesFilters = {
 
 const DEFAULT_PAGE_SIZE = 25;
 
+const toIsoDateRangeParam = (value: string, boundary: 'start' | 'end'): string => {
+  if (!value) return value;
+  // If already includes a time component, assume ISO-ish and pass through.
+  if (value.includes('T')) return value;
+  if (boundary === 'start') return `${value}T00:00:00.000Z`;
+  return `${value}T23:59:59.999Z`;
+};
+
 export default function Traces() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [traces, setTraces] = useState<Trace[]>([]);
@@ -43,10 +51,12 @@ export default function Traces() {
     const pageParam = searchParams.get('page');
     return pageParam ? Math.max(1, parseInt(pageParam, 10)) : 1;
   });
+
   const [pageSize, setPageSize] = useState(() => {
     const pageSizeParam = searchParams.get('pageSize');
     return pageSizeParam ? parseInt(pageSizeParam, 10) : DEFAULT_PAGE_SIZE;
   });
+
   const [filters, setFilters] = useState<TracesFilters>(() => ({
     provider: searchParams.get('provider') || '',
     model: searchParams.get('model') || '',
@@ -55,6 +65,7 @@ export default function Traces() {
     date_to: searchParams.get('date_to') || '',
     session_id: searchParams.get('session_id') || '',
   }));
+
   const [selectedTrace, setSelectedTrace] = useState<Trace | null>(null);
 
   const fetchTraces = useCallback(async () => {
@@ -68,8 +79,8 @@ export default function Traces() {
       if (filters.provider) params.provider = filters.provider;
       if (filters.model) params.model = filters.model;
       if (filters.status) params.status = filters.status;
-      if (filters.date_from) params.date_from = filters.date_from;
-      if (filters.date_to) params.date_to = filters.date_to;
+      if (filters.date_from) params.date_from = toIsoDateRangeParam(filters.date_from, 'start');
+      if (filters.date_to) params.date_to = toIsoDateRangeParam(filters.date_to, 'end');
       if (filters.session_id) params.session_id = filters.session_id;
 
       const response = await getTraces(params);
@@ -179,7 +190,7 @@ export default function Traces() {
 
         {/* Traces Table Area */}
         <main className="flex-1 overflow-hidden relative">
-          <div className="h-full overflow-auto p-6">
+          <div className={`h-full overflow-auto p-6 ${selectedTrace ? 'pr-[460px]' : ''}`}>
             {error && (
               <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-lg">
                 <div className="flex items-center justify-between gap-4">

@@ -50,13 +50,55 @@ export async function getTraces(c: Context): Promise<Response> {
     throw err;
   }
 
+  const parseDateParam = (value: string | number | undefined, boundary: "start" | "end"): Date | undefined => {
+    if (value === undefined) return undefined;
+
+    if (typeof value === "number") {
+      const ms = value < 1_000_000_000_000 ? value * 1000 : value;
+      const date = new Date(ms);
+      return Number.isNaN(date.getTime()) ? undefined : date;
+    }
+
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+      const iso = boundary === "start"
+        ? `${trimmed}T00:00:00.000Z`
+        : `${trimmed}T23:59:59.999Z`;
+      const date = new Date(iso);
+      return Number.isNaN(date.getTime()) ? undefined : date;
+    }
+
+    // Numeric string (epoch seconds or ms)
+    if (/^\d+$/.test(trimmed)) {
+      const num = Number(trimmed);
+      const ms = num < 1_000_000_000_000 ? num * 1000 : num;
+      const date = new Date(ms);
+      return Number.isNaN(date.getTime()) ? undefined : date;
+    }
+
+    // ISO-ish datetime string
+    const date = new Date(trimmed);
+    return Number.isNaN(date.getTime()) ? undefined : date;
+  };
+
+  const dateFrom = parseDateParam(params.date_from, "start");
+  const dateTo = parseDateParam(params.date_to, "end");
+  if (params.date_from !== undefined && !dateFrom) {
+    return c.json({ error: "Invalid date_from parameter" }, 400);
+  }
+  if (params.date_to !== undefined && !dateTo) {
+    return c.json({ error: "Invalid date_to parameter" }, 400);
+  }
+
   const filters = {
     sessionId: params.session_id,
     provider: params.provider,
     model: params.model,
     status: params.status,
-    dateFrom: params.date_from ? new Date(params.date_from) : undefined,
-    dateTo: params.date_to ? new Date(params.date_to) : undefined,
+    dateFrom,
+    dateTo,
     limit: params.limit,
     offset: params.offset,
   };
