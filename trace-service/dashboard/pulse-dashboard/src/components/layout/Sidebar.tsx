@@ -136,7 +136,7 @@ export function Sidebar() {
           onClick={() => setUserMenuOpen(!userMenuOpen)}
           className="w-full flex items-center gap-2 px-2 py-1.5 text-sm text-neutral-400 hover:text-white hover:bg-neutral-850 rounded transition-colors"
         >
-          <div className="w-6 h-6 rounded bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-xs font-medium text-white">
+          <div className="w-6 h-6 bg-neutral-700 flex items-center justify-center text-xs font-medium text-neutral-300">
             U
           </div>
           <span className="truncate flex-1 text-left">User</span>
