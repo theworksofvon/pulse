@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Providers — Pulse Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../landing.html" class="logo">Pulse</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-section">Docs</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Quickstart</a>
+        <a href="configuration.html">Configuration</a>
+        <a href="providers.html" class="active">Providers</a>
+        <a href="sessions.html">Sessions &amp; Metadata</a>
+        <a href="api.html">API</a>
+        <a href="self-host.html">Self-host</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="index.html" class="sidebar-link">Quickstart</a>
+        <a href="configuration.html" class="sidebar-link">Configuration</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">SDK</div>
+        <a href="providers.html" class="sidebar-link active">Providers</a>
+        <a href="sessions.html" class="sidebar-link">Sessions &amp; Metadata</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">Reference</div>
+        <a href="api.html" class="sidebar-link">REST API</a>
+        <a href="self-host.html" class="sidebar-link">Self-host</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="doc-header">
+        <div class="doc-label">SDK</div>
+        <h1>Providers</h1>
+        <p class="doc-lead">How to use <code>observe()</code> with each supported provider.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2>observe(client, provider, options?)</h2>
+        <p>Wraps an LLM client and returns a traced version. The returned client has the same type and API as the original.</p>
+        <pre><code><span class="kw">const</span> traced = <span class="fn">observe</span>(client, <span class="typ">Provider</span>.OpenAI);
+<span class="kw">const</span> traced = <span class="fn">observe</span>(client, <span class="typ">Provider</span>.Anthropic);
+<span class="kw">const</span> traced = <span class="fn">observe</span>(client, <span class="typ">Provider</span>.OpenRouter);</code></pre>
+        <p>What gets patched:</p>
+        <ul>
+          <li><strong>OpenAI / OpenRouter</strong> — <code>client.chat.completions.create</code></li>
+          <li><strong>Anthropic</strong> — <code>client.messages.create</code></li>
+        </ul>
+        <p>All other methods on the client remain untouched.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>OpenAI</h2>
+        <pre><code><span class="kw">import</span> <span class="typ">OpenAI</span> <span class="kw">from</span> <span class="str">'openai'</span>;
+<span class="kw">import</span> { <span class="fn">observe</span>, <span class="typ">Provider</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;
+
+<span class="kw">const</span> client = <span class="fn">observe</span>(
+  <span class="kw">new</span> <span class="typ">OpenAI</span>({ apiKey: <span class="str">'sk-...'</span> }),
+  <span class="typ">Provider</span>.OpenAI
+);
+
+<span class="cmt">// Non-streaming</span>
+<span class="kw">const</span> res = <span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'gpt-4o'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+});
+
+<span class="cmt">// Streaming</span>
+<span class="kw">const</span> stream = <span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'gpt-4o'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+  stream: <span class="kw">true</span>,
+});
+
+<span class="kw">for await</span> (<span class="kw">const</span> chunk <span class="kw">of</span> stream) {
+  process.stdout.<span class="fn">write</span>(chunk.choices[0]?.delta?.content ?? <span class="str">''</span>);
+}</code></pre>
+        <p>Both streaming and non-streaming calls are traced. For streams, the trace is recorded after the stream completes.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Anthropic</h2>
+        <pre><code><span class="kw">import</span> <span class="typ">Anthropic</span> <span class="kw">from</span> <span class="str">'@anthropic-ai/sdk'</span>;
+<span class="kw">import</span> { <span class="fn">observe</span>, <span class="typ">Provider</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;
+
+<span class="kw">const</span> client = <span class="fn">observe</span>(
+  <span class="kw">new</span> <span class="typ">Anthropic</span>({ apiKey: <span class="str">'sk-ant-...'</span> }),
+  <span class="typ">Provider</span>.Anthropic
+);
+
+<span class="cmt">// Non-streaming</span>
+<span class="kw">const</span> res = <span class="kw">await</span> client.messages.<span class="fn">create</span>({
+  model: <span class="str">'claude-3-5-sonnet-20241022'</span>,
+  max_tokens: 1024,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+});
+
+<span class="cmt">// Streaming</span>
+<span class="kw">const</span> stream = <span class="kw">await</span> client.messages.<span class="fn">create</span>({
+  model: <span class="str">'claude-3-5-sonnet-20241022'</span>,
+  max_tokens: 1024,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+  stream: <span class="kw">true</span>,
+});
+
+<span class="kw">for await</span> (<span class="kw">const</span> event <span class="kw">of</span> stream) {
+  <span class="kw">if</span> (event.type === <span class="str">'content_block_delta'</span>) {
+    process.stdout.<span class="fn">write</span>(event.delta.text);
+  }
+}</code></pre>
+        <div class="callout">
+          <strong>Stop reason mapping.</strong> Anthropic stop reasons are normalized:
+          <code>end_turn</code> &rarr; <code>stop</code>,
+          <code>max_tokens</code> &rarr; <code>length</code>,
+          <code>stop_sequence</code> &rarr; <code>stop</code>,
+          <code>tool_use</code> &rarr; <code>tool_calls</code>.
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2>OpenRouter</h2>
+        <p>OpenRouter uses the OpenAI client library. Pass <code>Provider.OpenRouter</code> so Pulse records the correct provider and extracts OpenRouter-specific cost data.</p>
+        <pre><code><span class="kw">import</span> <span class="typ">OpenAI</span> <span class="kw">from</span> <span class="str">'openai'</span>;
+<span class="kw">import</span> { <span class="fn">observe</span>, <span class="typ">Provider</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;
+
+<span class="kw">const</span> client = <span class="fn">observe</span>(
+  <span class="kw">new</span> <span class="typ">OpenAI</span>({
+    apiKey: <span class="str">'sk-or-...'</span>,
+    baseURL: <span class="str">'https://openrouter.ai/api/v1'</span>,
+  }),
+  <span class="typ">Provider</span>.OpenRouter
+);
+
+<span class="kw">const</span> res = <span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'anthropic/claude-3.5-sonnet'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+});</code></pre>
+        <p>When OpenRouter includes a <code>cost</code> field in the response, Pulse uses that directly instead of calculating from token counts.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Pricing</h2>
+        <p>The SDK calculates cost automatically for known models. Pricing is built in for:</p>
+        <table>
+          <thead>
+            <tr><th>Model</th><th>Input</th><th>Output</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>gpt-4o</code></td><td>$2.50 / 1M</td><td>$10.00 / 1M</td></tr>
+            <tr><td><code>gpt-4o-mini</code></td><td>$0.15 / 1M</td><td>$0.60 / 1M</td></tr>
+            <tr><td><code>gpt-4-turbo</code></td><td>$10.00 / 1M</td><td>$30.00 / 1M</td></tr>
+            <tr><td><code>gpt-3.5-turbo</code></td><td>$0.50 / 1M</td><td>$1.50 / 1M</td></tr>
+            <tr><td><code>claude-3-5-sonnet-20241022</code></td><td>$3.00 / 1M</td><td>$15.00 / 1M</td></tr>
+            <tr><td><code>claude-3-5-haiku-20241022</code></td><td>$0.80 / 1M</td><td>$4.00 / 1M</td></tr>
+            <tr><td><code>claude-3-opus-20240229</code></td><td>$15.00 / 1M</td><td>$75.00 / 1M</td></tr>
+          </tbody>
+        </table>
+        <p>Model aliases (e.g. <code>gpt-4o-2024-11-20</code>) are resolved to their base model for pricing. Unknown models report <code>null</code> cost.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Error handling</h2>
+        <p>If the LLM call throws, the SDK captures an error trace (with <code>status: "error"</code> and error details) and then re-throws the original error. Your application error handling is unaffected.</p>
+        <p>If trace sending fails (network error, server down), the SDK logs a warning and continues. Tracing never breaks your application.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

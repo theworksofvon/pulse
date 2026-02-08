@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sessions &amp; Metadata — Pulse Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../landing.html" class="logo">Pulse</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-section">Docs</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Quickstart</a>
+        <a href="configuration.html">Configuration</a>
+        <a href="providers.html">Providers</a>
+        <a href="sessions.html" class="active">Sessions &amp; Metadata</a>
+        <a href="api.html">API</a>
+        <a href="self-host.html">Self-host</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="index.html" class="sidebar-link">Quickstart</a>
+        <a href="configuration.html" class="sidebar-link">Configuration</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">SDK</div>
+        <a href="providers.html" class="sidebar-link">Providers</a>
+        <a href="sessions.html" class="sidebar-link active">Sessions &amp; Metadata</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">Reference</div>
+        <a href="api.html" class="sidebar-link">REST API</a>
+        <a href="self-host.html" class="sidebar-link">Self-host</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="doc-header">
+        <div class="doc-label">SDK</div>
+        <h1>Sessions &amp; Metadata</h1>
+        <p class="doc-lead">Group traces into sessions and attach custom metadata.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2>Sessions</h2>
+        <p>A session groups related LLM calls together — a user conversation, an agent run, a batch job. Assign a session ID and all traces with that ID appear as a timeline in the dashboard.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Setting a session ID</h2>
+        <h3>At observe-time</h3>
+        <p>Pass <code>sessionId</code> in the options. All calls through this client use this session.</p>
+        <pre><code><span class="kw">const</span> client = <span class="fn">observe</span>(
+  <span class="kw">new</span> <span class="typ">OpenAI</span>({ apiKey: <span class="str">'sk-...'</span> }),
+  <span class="typ">Provider</span>.OpenAI,
+  { sessionId: <span class="str">'conv-abc-123'</span> }
+);</code></pre>
+
+        <h3>Per-call override</h3>
+        <p>Pass <code>pulseSessionId</code> in the request body to override the observe-time session for a specific call.</p>
+        <pre><code><span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'gpt-4o'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+  pulseSessionId: <span class="str">'different-session-456'</span>,
+});</code></pre>
+        <p>Per-call takes precedence. The <code>pulseSessionId</code> param is stripped before the request reaches the provider.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Metadata</h2>
+        <p>Attach arbitrary key-value data to traces. Useful for filtering by user, feature, environment, or any dimension you care about.</p>
+
+        <h3>At observe-time</h3>
+        <pre><code><span class="kw">const</span> client = <span class="fn">observe</span>(
+  <span class="kw">new</span> <span class="typ">OpenAI</span>({ apiKey: <span class="str">'sk-...'</span> }),
+  <span class="typ">Provider</span>.OpenAI,
+  {
+    metadata: {
+      userId: <span class="str">'user-123'</span>,
+      environment: <span class="str">'production'</span>,
+    }
+  }
+);</code></pre>
+
+        <h3>Per-call extension</h3>
+        <p>Pass <code>pulseMetadata</code> in the request body. It merges with the observe-time metadata — per-call values win on conflicts.</p>
+        <pre><code><span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'gpt-4o'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Summarize this'</span> }],
+  pulseMetadata: {
+    feature: <span class="str">'summarizer'</span>,
+    version: <span class="str">'2.1'</span>,
+  },
+});
+
+<span class="cmt">// Final metadata on trace:</span>
+<span class="cmt">// { userId: 'user-123', environment: 'production', feature: 'summarizer', version: '2.1' }</span></code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>ObserveOptions</h2>
+        <p>The third argument to <code>observe()</code>:</p>
+        <div class="params">
+          <div class="param">
+            <span class="param-name">sessionId</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Default session ID for all calls through this client.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">metadata</span>
+            <span class="param-type">Record&lt;string, unknown&gt;</span>
+            <div class="param-desc">Default metadata merged into every trace from this client.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2>Per-call params</h2>
+        <p>These are passed in the request body alongside normal provider params. They are stripped before the request is sent to the provider.</p>
+        <div class="params">
+          <div class="param">
+            <span class="param-name">pulseSessionId</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Override session ID for this call only.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">pulseMetadata</span>
+            <span class="param-type">Record&lt;string, unknown&gt;</span>
+            <div class="param-desc">Additional metadata merged with observe-time metadata. Per-call values win on key conflicts.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2>Viewing sessions</h2>
+        <p>In the dashboard, navigate to Sessions to see all sessions grouped by ID. Each session shows a timeline of its traces ordered by timestamp.</p>
+        <p>Via the API:</p>
+        <pre><code>GET /v1/sessions/:id</code></pre>
+        <p>Returns all traces for that session. See <a href="api.html">API reference</a>.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

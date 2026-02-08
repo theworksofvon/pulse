@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Self-host — Pulse Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../landing.html" class="logo">Pulse</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-section">Docs</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Quickstart</a>
+        <a href="configuration.html">Configuration</a>
+        <a href="providers.html">Providers</a>
+        <a href="sessions.html">Sessions &amp; Metadata</a>
+        <a href="api.html">API</a>
+        <a href="self-host.html" class="active">Self-host</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="index.html" class="sidebar-link">Quickstart</a>
+        <a href="configuration.html" class="sidebar-link">Configuration</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">SDK</div>
+        <a href="providers.html" class="sidebar-link">Providers</a>
+        <a href="sessions.html" class="sidebar-link">Sessions &amp; Metadata</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">Reference</div>
+        <a href="api.html" class="sidebar-link">REST API</a>
+        <a href="self-host.html" class="sidebar-link active">Self-host</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="doc-header">
+        <div class="doc-label">Reference</div>
+        <h1>Self-host</h1>
+        <p class="doc-lead">Deploy the full Pulse stack on your own infrastructure.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2>Requirements</h2>
+        <ul>
+          <li>Docker and Docker Compose</li>
+          <li>PostgreSQL 15+ (or use the bundled container)</li>
+          <li>Bun runtime (for running without Docker)</li>
+        </ul>
+      </section>
+
+      <section class="doc-section">
+        <h2>Quick start with Docker</h2>
+        <pre><code>git clone https://github.com/pulsehq/pulse.git
+cd pulse
+cp .env.example .env
+docker compose up -d</code></pre>
+        <p>This starts three containers:</p>
+        <ul>
+          <li><code>pulse-postgres</code> — PostgreSQL database</li>
+          <li><code>pulse-api</code> — Trace service API (Hono)</li>
+          <li><code>pulse-dash</code> — React dashboard</li>
+        </ul>
+        <p>Dashboard is available at <code>http://localhost:3000</code>.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Environment variables</h2>
+        <div class="params">
+          <div class="param">
+            <span class="param-name">DATABASE_URL</span>
+            <span class="param-type">string</span>
+            <span class="param-required">required</span>
+            <div class="param-desc">PostgreSQL connection string. Example: <code>postgres://user:pass@localhost:5432/pulse</code></div>
+          </div>
+          <div class="param">
+            <span class="param-name">PORT</span>
+            <span class="param-type">number</span>
+            <div class="param-desc">Server port. Default: <code>3000</code></div>
+          </div>
+          <div class="param">
+            <span class="param-name">ADMIN_API_KEY</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Admin key for creating projects and managing API keys.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2>Running without Docker</h2>
+        <p>If you prefer to run directly with Bun:</p>
+        <pre><code><span class="cmt"># Install dependencies</span>
+cd trace-service && bun install
+cd dashboard/pulse-dashboard && bun install
+
+<span class="cmt"># Run database migrations</span>
+cd trace-service
+bun run db:push
+
+<span class="cmt"># Start the server</span>
+bun run index.ts
+
+<span class="cmt"># In another terminal, start the dashboard</span>
+cd trace-service/dashboard/pulse-dashboard
+bun run dev</code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>Architecture</h2>
+        <p>The self-hosted stack consists of:</p>
+        <table>
+          <thead>
+            <tr><th>Component</th><th>Tech</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Trace service</td><td>Hono (Bun)</td><td>REST API for trace ingestion, querying, and admin</td></tr>
+            <tr><td>Dashboard</td><td>React + Vite</td><td>Web UI for browsing traces, sessions, analytics</td></tr>
+            <tr><td>Database</td><td>PostgreSQL</td><td>Trace storage with Drizzle ORM</td></tr>
+          </tbody>
+        </table>
+        <p>The dashboard builds to static files served by the trace service, so in production you only need the API server and PostgreSQL.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Creating a project</h2>
+        <p>Use the admin API to create a project and get an API key:</p>
+        <pre><code>curl -X POST http://localhost:3000/admin/projects \
+  -H "Authorization: Bearer $ADMIN_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "my-app" }'</code></pre>
+        <p>The response includes a <code>pulse_sk_</code> API key. Use this key with the SDK:</p>
+        <pre><code><span class="fn">initPulse</span>({
+  apiKey: <span class="str">'pulse_sk_...'</span>,
+  apiUrl: <span class="str">'http://localhost:3000'</span>,
+});</code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>Database schema</h2>
+        <p>The trace service uses four tables:</p>
+        <table>
+          <thead>
+            <tr><th>Table</th><th>Purpose</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>projects</code></td><td>Container for traces and API keys</td></tr>
+            <tr><td><code>api_keys</code></td><td>Hashed API keys linked to projects</td></tr>
+            <tr><td><code>sessions</code></td><td>Session metadata</td></tr>
+            <tr><td><code>traces</code></td><td>Individual LLM call records</td></tr>
+          </tbody>
+        </table>
+        <p>Traces are indexed on <code>(project_id, timestamp)</code> and <code>(project_id, session_id)</code> for fast queries.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Production considerations</h2>
+        <ul>
+          <li>Put the API behind a reverse proxy (nginx, Caddy) with TLS</li>
+          <li>Set a strong <code>ADMIN_API_KEY</code></li>
+          <li>Configure PostgreSQL connection pooling for high throughput</li>
+          <li>The SDK batches traces, so the API handles bursts well even on modest hardware</li>
+          <li>Build the dashboard for production: <code>cd pulse-dashboard && bun run build</code></li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

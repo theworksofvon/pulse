@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Configuration — Pulse Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../landing.html" class="logo">Pulse</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-section">Docs</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Quickstart</a>
+        <a href="configuration.html" class="active">Configuration</a>
+        <a href="providers.html">Providers</a>
+        <a href="sessions.html">Sessions &amp; Metadata</a>
+        <a href="api.html">API</a>
+        <a href="self-host.html">Self-host</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="index.html" class="sidebar-link">Quickstart</a>
+        <a href="configuration.html" class="sidebar-link active">Configuration</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">SDK</div>
+        <a href="providers.html" class="sidebar-link">Providers</a>
+        <a href="sessions.html" class="sidebar-link">Sessions &amp; Metadata</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">Reference</div>
+        <a href="api.html" class="sidebar-link">REST API</a>
+        <a href="self-host.html" class="sidebar-link">Self-host</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="doc-header">
+        <div class="doc-label">Getting Started</div>
+        <h1>Configuration</h1>
+        <p class="doc-lead">All options for <code>initPulse()</code>.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2>initPulse(config)</h2>
+        <p>Call once at application startup before any <code>observe()</code> calls.</p>
+        <pre><code><span class="kw">import</span> { <span class="fn">initPulse</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;
+
+<span class="fn">initPulse</span>({
+  apiKey: <span class="str">'pulse_sk_...'</span>,
+  apiUrl: <span class="str">'https://pulse.yourcompany.com'</span>,
+  batchSize: 20,
+  flushInterval: 10000,
+  enabled: process.env.NODE_ENV === <span class="str">'production'</span>,
+});</code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>Options</h2>
+        <div class="params">
+          <div class="param">
+            <span class="param-name">apiKey</span>
+            <span class="param-type">string</span>
+            <span class="param-required">required</span>
+            <div class="param-desc">Your Pulse API key. Must start with <code>pulse_sk_</code>.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">apiUrl</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Pulse server URL. Default: <code>http://localhost:3000</code></div>
+          </div>
+          <div class="param">
+            <span class="param-name">batchSize</span>
+            <span class="param-type">number</span>
+            <div class="param-desc">Number of traces to buffer before flushing. Range: 1-100. Default: <code>10</code></div>
+          </div>
+          <div class="param">
+            <span class="param-name">flushInterval</span>
+            <span class="param-type">number</span>
+            <div class="param-desc">Milliseconds between periodic flushes. Minimum: 1000. Default: <code>5000</code></div>
+          </div>
+          <div class="param">
+            <span class="param-name">enabled</span>
+            <span class="param-type">boolean</span>
+            <div class="param-desc">Enable or disable tracing. Useful for disabling in tests or dev. Default: <code>true</code></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2>Batching behavior</h2>
+        <p>Traces are buffered in memory and sent to the server in two situations:</p>
+        <ul>
+          <li>The buffer reaches <code>batchSize</code> — flushes immediately</li>
+          <li>The <code>flushInterval</code> timer fires — flushes whatever is buffered</li>
+        </ul>
+        <p>On process exit (<code>beforeExit</code>, <code>SIGINT</code>, <code>SIGTERM</code>), the SDK flushes all remaining traces before shutdown.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Validation</h2>
+        <p><code>initPulse()</code> validates all config values at startup:</p>
+        <ul>
+          <li><code>apiKey</code> must be a non-empty string starting with <code>pulse_sk_</code></li>
+          <li><code>batchSize</code> must be an integer between 1 and 100</li>
+          <li><code>flushInterval</code> must be at least 1000ms</li>
+        </ul>
+        <p>Invalid values throw immediately so you catch misconfiguration early.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Disabling tracing</h2>
+        <p>Set <code>enabled: false</code> to turn off all tracing. The <code>observe()</code> wrapper still returns a working client — it just skips trace capture.</p>
+        <pre><code><span class="fn">initPulse</span>({
+  apiKey: <span class="str">'pulse_sk_...'</span>,
+  enabled: <span class="kw">false</span>, <span class="cmt">// No traces sent</span>
+});</code></pre>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

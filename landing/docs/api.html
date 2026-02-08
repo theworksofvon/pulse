@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>REST API — Pulse Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../landing.html" class="logo">Pulse</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-section">Docs</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html">Quickstart</a>
+        <a href="configuration.html">Configuration</a>
+        <a href="providers.html">Providers</a>
+        <a href="sessions.html">Sessions &amp; Metadata</a>
+        <a href="api.html" class="active">API</a>
+        <a href="self-host.html">Self-host</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="index.html" class="sidebar-link">Quickstart</a>
+        <a href="configuration.html" class="sidebar-link">Configuration</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">SDK</div>
+        <a href="providers.html" class="sidebar-link">Providers</a>
+        <a href="sessions.html" class="sidebar-link">Sessions &amp; Metadata</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">Reference</div>
+        <a href="api.html" class="sidebar-link active">REST API</a>
+        <a href="self-host.html" class="sidebar-link">Self-host</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="doc-header">
+        <div class="doc-label">Reference</div>
+        <h1>REST API</h1>
+        <p class="doc-lead">All endpoints on the Pulse trace service.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2>Authentication</h2>
+        <p>All endpoints require a Bearer token in the <code>Authorization</code> header.</p>
+        <pre><code>Authorization: Bearer pulse_sk_...</code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>POST /v1/traces/batch</h2>
+        <p>Ingest a batch of traces. This is what the SDK calls automatically.</p>
+        <table>
+          <tbody>
+            <tr><td>Method</td><td><code>POST</code></td></tr>
+            <tr><td>Body</td><td>JSON array of trace objects</td></tr>
+            <tr><td>Response</td><td><code>202 Accepted</code></td></tr>
+          </tbody>
+        </table>
+        <pre><code>curl -X POST https://your-pulse/v1/traces/batch \
+  -H "Authorization: Bearer pulse_sk_..." \
+  -H "Content-Type: application/json" \
+  -d '[{
+    "trace_id": "uuid",
+    "timestamp": "2025-01-01T00:00:00Z",
+    "provider": "openai",
+    "model_requested": "gpt-4o",
+    "request_body": { ... },
+    "response_body": { ... },
+    "input_tokens": 50,
+    "output_tokens": 100,
+    "latency_ms": 1200,
+    "status": "success"
+  }]'</code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>GET /v1/traces</h2>
+        <p>Query traces for the authenticated project.</p>
+        <h3>Query parameters</h3>
+        <div class="params">
+          <div class="param">
+            <span class="param-name">session_id</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Filter by session ID.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">provider</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Filter by provider: <code>openai</code>, <code>anthropic</code>, <code>openrouter</code>.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">model</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Filter by model name.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">status</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Filter by status: <code>success</code> or <code>error</code>.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">date_from</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Start date. Accepts ISO 8601, epoch timestamp, or <code>YYYY-MM-DD</code>.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">date_to</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">End date. Same formats as <code>date_from</code>.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">limit</span>
+            <span class="param-type">number</span>
+            <div class="param-desc">Max results to return.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">offset</span>
+            <span class="param-type">number</span>
+            <div class="param-desc">Results offset for pagination.</div>
+          </div>
+        </div>
+        <pre><code>GET /v1/traces?provider=openai&status=error&limit=20</code></pre>
+        <p>Returns <code>{ traces: [...], total: number }</code>.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>GET /v1/traces/:id</h2>
+        <p>Get a single trace by ID.</p>
+        <pre><code>GET /v1/traces/550e8400-e29b-41d4-a716-446655440000</code></pre>
+        <p>Returns the trace object or <code>404</code>.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>GET /v1/sessions/:id</h2>
+        <p>Get all traces for a session, ordered by timestamp ascending.</p>
+        <pre><code>GET /v1/sessions/conv-abc-123</code></pre>
+        <p>Returns <code>{ traces: [...], metadata: {...} }</code> or <code>404</code>.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>GET /v1/analytics</h2>
+        <p>Aggregated metrics for the authenticated project.</p>
+        <div class="params">
+          <div class="param">
+            <span class="param-name">date_from</span>
+            <span class="param-type">string</span>
+            <span class="param-required">required</span>
+            <div class="param-desc">Start of date range.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">date_to</span>
+            <span class="param-type">string</span>
+            <span class="param-required">required</span>
+            <div class="param-desc">End of date range.</div>
+          </div>
+          <div class="param">
+            <span class="param-name">group_by</span>
+            <span class="param-type">string</span>
+            <div class="param-desc">Grouping dimension (optional).</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="doc-section">
+        <h2>Admin endpoints</h2>
+        <p>These require admin authentication.</p>
+
+        <h3>POST /admin/projects</h3>
+        <p>Create a new project.</p>
+        <pre><code>curl -X POST https://your-pulse/admin/projects \
+  -H "Content-Type: application/json" \
+  -d '{ "name": "my-app" }'</code></pre>
+        <p>Returns <code>201</code> with project info and a new API key.</p>
+
+        <h3>GET /admin/api-keys</h3>
+        <p>List all API keys for the authenticated project.</p>
+
+        <h3>DELETE /admin/api-keys/:id</h3>
+        <p>Delete an API key by ID. Returns <code>200</code> or <code>404</code>.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Trace object</h2>
+        <pre><code>{
+  <span class="str">"trace_id"</span>: <span class="str">"uuid"</span>,
+  <span class="str">"timestamp"</span>: <span class="str">"ISO 8601"</span>,
+  <span class="str">"provider"</span>: <span class="str">"openai | anthropic | openrouter"</span>,
+  <span class="str">"model_requested"</span>: <span class="str">"gpt-4o"</span>,
+  <span class="str">"model_used"</span>: <span class="str">"gpt-4o-2024-11-20"</span>,
+  <span class="str">"provider_request_id"</span>: <span class="str">"..."</span>,
+  <span class="str">"request_body"</span>: { ... },
+  <span class="str">"response_body"</span>: { ... },
+  <span class="str">"input_tokens"</span>: 50,
+  <span class="str">"output_tokens"</span>: 100,
+  <span class="str">"output_text"</span>: <span class="str">"Hello! How can I..."</span>,
+  <span class="str">"finish_reason"</span>: <span class="str">"stop"</span>,
+  <span class="str">"status"</span>: <span class="str">"success"</span>,
+  <span class="str">"error"</span>: <span class="kw">null</span>,
+  <span class="str">"cost_cents"</span>: 0.18,
+  <span class="str">"latency_ms"</span>: 1234,
+  <span class="str">"session_id"</span>: <span class="str">"conv-abc-123"</span>,
+  <span class="str">"metadata"</span>: { <span class="str">"userId"</span>: <span class="str">"user-123"</span> }
+}</code></pre>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

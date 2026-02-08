@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quickstart — Pulse Docs</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="docs.css" />
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="nav-left">
+        <a href="../landing.html" class="logo">Pulse</a>
+        <span class="nav-sep">/</span>
+        <span class="nav-section">Docs</span>
+      </div>
+      <div class="nav-links">
+        <a href="index.html" class="active">Quickstart</a>
+        <a href="configuration.html">Configuration</a>
+        <a href="providers.html">Providers</a>
+        <a href="sessions.html">Sessions &amp; Metadata</a>
+        <a href="api.html">API</a>
+        <a href="self-host.html">Self-host</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="index.html" class="sidebar-link active">Quickstart</a>
+        <a href="configuration.html" class="sidebar-link">Configuration</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">SDK</div>
+        <a href="providers.html" class="sidebar-link">Providers</a>
+        <a href="sessions.html" class="sidebar-link">Sessions &amp; Metadata</a>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-label">Reference</div>
+        <a href="api.html" class="sidebar-link">REST API</a>
+        <a href="self-host.html" class="sidebar-link">Self-host</a>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="doc-header">
+        <div class="doc-label">Getting Started</div>
+        <h1>Quickstart</h1>
+        <p class="doc-lead">Instrument your first LLM call in under 5 minutes.</p>
+      </div>
+
+      <section class="doc-section">
+        <h2>Install</h2>
+        <pre><code>bun add @pulse/sdk</code></pre>
+        <p>Works with Bun, Node, or any JavaScript runtime that supports <code>fetch</code>.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Initialize</h2>
+        <p>Call <code>initPulse()</code> once at application startup. You need an API key from the Pulse dashboard.</p>
+        <pre><code><span class="kw">import</span> { <span class="fn">initPulse</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;
+
+<span class="fn">initPulse</span>({
+  apiKey: <span class="str">'pulse_sk_...'</span>,
+});</code></pre>
+        <p>This starts background trace batching and registers shutdown handlers to flush remaining traces on exit.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Wrap your client</h2>
+        <p>Use <code>observe()</code> to wrap your LLM client. The returned client behaves identically — all tracing happens as a side effect.</p>
+        <pre><code><span class="kw">import</span> { <span class="fn">initPulse</span>, <span class="fn">observe</span>, <span class="typ">Provider</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;
+<span class="kw">import</span> <span class="typ">OpenAI</span> <span class="kw">from</span> <span class="str">'openai'</span>;
+
+<span class="fn">initPulse</span>({ apiKey: <span class="str">'pulse_sk_...'</span> });
+
+<span class="kw">const</span> client = <span class="fn">observe</span>(
+  <span class="kw">new</span> <span class="typ">OpenAI</span>({ apiKey: <span class="str">'sk-...'</span> }),
+  <span class="typ">Provider</span>.OpenAI
+);
+
+<span class="cmt">// Use as normal. Traces are captured automatically.</span>
+<span class="kw">const</span> res = <span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: <span class="str">'gpt-4o'</span>,
+  messages: [{ role: <span class="str">'user'</span>, content: <span class="str">'Hello'</span> }],
+});</code></pre>
+      </section>
+
+      <section class="doc-section">
+        <h2>What gets captured</h2>
+        <p>Each traced call records:</p>
+        <table>
+          <tbody>
+            <tr><td>Request &amp; response bodies</td><td>Full prompt and completion</td></tr>
+            <tr><td>Token counts</td><td>Input and output tokens</td></tr>
+            <tr><td>Latency</td><td>End-to-end request duration in ms</td></tr>
+            <tr><td>Cost</td><td>Calculated from model pricing in cents</td></tr>
+            <tr><td>Model</td><td>Requested and actual model used</td></tr>
+            <tr><td>Status</td><td><code>success</code> or <code>error</code></td></tr>
+            <tr><td>Provider</td><td>openai, anthropic, or openrouter</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="doc-section">
+        <h2>Supported providers</h2>
+        <table>
+          <thead>
+            <tr><th>Provider</th><th>Client</th><th>Enum</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>OpenAI</td><td><code>openai</code></td><td><code>Provider.OpenAI</code></td></tr>
+            <tr><td>Anthropic</td><td><code>@anthropic-ai/sdk</code></td><td><code>Provider.Anthropic</code></td></tr>
+            <tr><td>OpenRouter</td><td><code>openai</code></td><td><code>Provider.OpenRouter</code></td></tr>
+          </tbody>
+        </table>
+        <p>See <a href="providers.html">Providers</a> for detailed usage per provider.</p>
+      </section>
+
+      <section class="doc-section">
+        <h2>Next steps</h2>
+        <ul>
+          <li><a href="configuration.html">Configuration</a> — tune batching, flush intervals, and more</li>
+          <li><a href="sessions.html">Sessions &amp; Metadata</a> — group traces and attach custom data</li>
+          <li><a href="providers.html">Providers</a> — Anthropic, OpenRouter, and streaming</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
