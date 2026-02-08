@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pulse — LLM Observability Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --surface-2: #0c0c0c;
+      --border: #1e1e1e;
+      --border-hover: #333333;
+      --text: #e5e5e5;
+      --text-secondary: #888888;
+      --text-muted: #555555;
+      --white: #ffffff;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    ul { list-style: none; }
+    code { font-family: "JetBrains Mono", monospace; font-size: 0.9em; }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      background: rgba(8, 8, 8, 0.85);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .logo {
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .nav-menu {
+      display: flex;
+      gap: 0;
+    }
+
+    .nav-menu a {
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+      position: relative;
+    }
+
+    .nav-menu a::after {
+      content: "";
+      position: absolute;
+      bottom: 4px;
+      left: 16px;
+      right: 16px;
+      height: 1px;
+      background: var(--text);
+      transform: scaleX(0);
+      transform-origin: right;
+      transition: transform 0.2s;
+    }
+
+    .nav-menu a:hover { color: var(--text); }
+    .nav-menu a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 20px;
+      font-family: "Inter", sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .btn:hover {
+      border-color: var(--border-hover);
+      color: var(--text);
+    }
+
+    .btn-primary {
+      background: var(--white);
+      border-color: var(--white);
+      color: var(--bg);
+    }
+
+    .btn-primary:hover {
+      background: var(--text);
+      border-color: var(--text);
+      color: var(--bg);
+    }
+
+    .btn-lg {
+      padding: 12px 28px;
+      font-size: 14px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 160px 0 100px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero h1 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2.8rem, 4.5vw, 4rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+
+    .hero-sub {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 440px;
+      margin-bottom: 32px;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .hero-code {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .code-bar {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .code-body {
+      padding: 24px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 1.9;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+
+    .code-body .kw { color: #c4b5fd; }
+    .code-body .fn { color: var(--text); }
+    .code-body .str { color: #86efac; }
+    .code-body .cmt { color: var(--text-muted); }
+    .code-body .typ { color: #93c5fd; }
+
+    /* ── METRICS ── */
+    .metrics {
+      border-bottom: 1px solid var(--border);
+    }
+
+    .metrics .container {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .metric {
+      padding: 40px 0;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .metric:last-child { border-right: none; }
+
+    .metric h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--white);
+    }
+
+    .metric p {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      margin-top: 4px;
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      padding: 100px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .section-header {
+      max-width: 560px;
+      margin-bottom: 56px;
+    }
+
+    .section-header.center {
+      margin-left: auto;
+      margin-right: auto;
+      text-align: center;
+    }
+
+    .section-header h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: var(--white);
+      margin-bottom: 16px;
+    }
+
+    .section-header p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    /* ── FEATURES ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .feature-card {
+      padding: 32px;
+      border: 1px solid var(--border);
+      margin-right: -1px;
+      margin-bottom: -1px;
+      transition: border-color 0.2s;
+    }
+
+    .feature-card:hover { border-color: var(--border-hover); }
+
+    .feature-card .tag {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── STEPS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      counter-reset: step;
+    }
+
+    .step {
+      padding: 32px;
+      border: 1px solid var(--border);
+      margin-right: -1px;
+      counter-increment: step;
+    }
+
+    .step-num {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+
+    .step h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+      color: var(--white);
+    }
+
+    .step p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .step-code {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 16px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .step-code .kw { color: #c4b5fd; }
+    .step-code .fn { color: var(--text); }
+    .step-code .str { color: #86efac; }
+
+    /* ── PRICING ── */
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .price-card {
+      padding: 36px 32px;
+      border: 1px solid var(--border);
+      margin-right: -1px;
+      display: flex;
+      flex-direction: column;
+      transition: border-color 0.2s;
+    }
+
+    .price-card:hover { border-color: var(--border-hover); }
+
+    .price-card.featured {
+      background: var(--surface);
+      border-color: var(--border-hover);
+    }
+
+    .price-tier {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .price-amount {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 4px;
+    }
+
+    .price-amount span {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+
+    .price-desc {
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .price-features {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .price-features li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .price-features li::before {
+      content: "\2014";
+      position: absolute;
+      left: 0;
+      color: var(--text-muted);
+    }
+
+    .price-card .btn { width: 100%; justify-content: center; }
+
+    /* ── SELF HOST ── */
+    .selfhost-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid var(--border);
+    }
+
+    .selfhost-content {
+      padding: 48px;
+      border-right: 1px solid var(--border);
+    }
+
+    .selfhost-content h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+
+    .selfhost-content > p {
+      color: var(--text-secondary);
+      margin-bottom: 28px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .selfhost-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .selfhost-list li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding-left: 20px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .selfhost-list li::before {
+      content: "\2014";
+      position: absolute;
+      left: 0;
+      color: var(--text-muted);
+    }
+
+    .selfhost-terminal {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .term-bar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border);
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .term-body {
+      padding: 24px;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 13px;
+      line-height: 2;
+      color: var(--text-secondary);
+      flex: 1;
+    }
+
+    .term-body .prompt { color: var(--text-muted); }
+    .term-body .cmd { color: var(--text); }
+    .term-body .out { color: var(--text-muted); }
+
+    /* ── DOCS ── */
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .doc-card {
+      padding: 28px;
+      border: 1px solid var(--border);
+      margin-right: -1px;
+      margin-bottom: -1px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: border-color 0.2s;
+    }
+
+    .doc-card:hover { border-color: var(--border-hover); }
+
+    .doc-card .doc-label {
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+    }
+
+    .doc-card h3 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--white);
+    }
+
+    .doc-card p {
+      color: var(--text-secondary);
+      font-size: 13px;
+      flex: 1;
+      line-height: 1.6;
+    }
+
+    .doc-card .doc-link {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .doc-card:hover .doc-link { color: var(--text); }
+
+    /* ── CTA ── */
+    .cta-section {
+      padding: 120px 0;
+      text-align: center;
+    }
+
+    .cta-section h2 {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: clamp(2rem, 3.5vw, 3.2rem);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--white);
+      margin-bottom: 16px;
+      line-height: 1.1;
+    }
+
+    .cta-section p {
+      color: var(--text-secondary);
+      font-size: 15px;
+      margin-bottom: 36px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cta-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 48px 0;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+    }
+
+    .footer-brand p {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 12px;
+      max-width: 260px;
+      line-height: 1.6;
+    }
+
+    .footer-col h4 {
+      font-size: 11px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .footer-col ul {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .footer-col a {
+      font-size: 13px;
+      color: var(--text-muted);
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover { color: var(--text); }
+
+    .footer-bottom {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .hero .container { grid-template-columns: 1fr; gap: 40px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .selfhost-grid { grid-template-columns: 1fr; }
+      .selfhost-content { border-right: none; border-bottom: 1px solid var(--border); }
+      .docs-grid { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .metrics .container { grid-template-columns: repeat(2, 1fr); }
+      .metric:nth-child(2) { border-right: none; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .nav-menu { display: none; }
+      .hero { padding: 120px 0 64px; }
+      .hero-actions { flex-direction: column; }
+      .hero-actions .btn { width: 100%; justify-content: center; }
+      .metrics .container { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container">
+      <div class="nav-left">
+        <a href="#" class="logo">Pulse</a>
+        <div class="nav-menu">
+          <a href="#features">Features</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="#docs">Docs</a>
+          <a href="#self-host">Self-host</a>
+        </div>
+      </div>
+      <div class="nav-right">
+        <a href="#" class="btn">Sign in</a>
+        <a href="#pricing" class="btn btn-primary">Get started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="container">
+      <div>
+        <h1>Observability for every LLM call your app makes</h1>
+        <p class="hero-sub">
+          Trace prompts, completions, latency, tokens, and cost across OpenAI, Anthropic, and OpenRouter. Use our hosted platform or deploy on your own infrastructure.
+        </p>
+        <div class="hero-actions">
+          <a href="#pricing" class="btn btn-primary btn-lg">Start free</a>
+          <a href="#self-host" class="btn btn-lg">Self-host guide</a>
+        </div>
+      </div>
+      <div class="hero-code">
+        <div class="code-bar">app.ts</div>
+        <div class="code-body">
+          <div><span class="kw">import</span> { <span class="fn">initPulse</span>, <span class="fn">observe</span>, <span class="typ">Provider</span> } <span class="kw">from</span> <span class="str">'@pulse/sdk'</span>;</div>
+          <div><span class="kw">import</span> <span class="typ">OpenAI</span> <span class="kw">from</span> <span class="str">'openai'</span>;</div>
+          <br />
+          <div><span class="fn">initPulse</span>({ apiKey: <span class="str">'pulse_sk_...'</span> });</div>
+          <br />
+          <div><span class="kw">const</span> <span class="fn">client</span> = <span class="fn">observe</span>(</div>
+          <div>&nbsp;&nbsp;<span class="kw">new</span> <span class="typ">OpenAI</span>({ apiKey: <span class="str">'...'</span> }),</div>
+          <div>&nbsp;&nbsp;<span class="typ">Provider</span>.OpenAI</div>
+          <div>);</div>
+          <br />
+          <div><span class="cmt">// Every call is now traced automatically.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="container">
+      <div class="metric">
+        <h3>&lt; 2ms</h3>
+        <p>SDK overhead</p>
+      </div>
+      <div class="metric">
+        <h3>3</h3>
+        <p>Providers</p>
+      </div>
+      <div class="metric">
+        <h3>100%</h3>
+        <p>Source available</p>
+      </div>
+      <div class="metric">
+        <h3>0</h3>
+        <p>Vendor lock-in</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <section id="features" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Features</div>
+        <h2>Everything you need to understand your LLM stack</h2>
+        <p>From individual traces to full session timelines, Pulse gives your team the visibility to ship with confidence.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="tag">Tracing</div>
+          <h3>End-to-end trace capture</h3>
+          <p>Every prompt, completion, token count, latency, and cost stored with full request and response bodies.</p>
+        </div>
+        <div class="feature-card">
+          <div class="tag">Sessions</div>
+          <h3>Session timelines</h3>
+          <p>Group related calls into sessions. See full conversations or agent runs as a timeline.</p>
+        </div>
+        <div class="feature-card">
+          <div class="tag">Analytics</div>
+          <h3>Cost and usage tracking</h3>
+          <p>Track spend per model, per project, per session. Catch cost spikes before they hit your bill.</p>
+        </div>
+        <div class="feature-card">
+          <div class="tag">Routing</div>
+          <h3>Provider agnostic</h3>
+          <p>OpenAI, Anthropic, OpenRouter. One SDK, consistent metrics across all providers.</p>
+        </div>
+        <div class="feature-card">
+          <div class="tag">Search</div>
+          <h3>Full-text search</h3>
+          <p>Search across prompts and completions. Filter by model, status, cost, latency, or any metadata field.</p>
+        </div>
+        <div class="feature-card">
+          <div class="tag">Privacy</div>
+          <h3>Deploy anywhere</h3>
+          <p>Run the full stack on your infrastructure. Docker Compose setup, Postgres backend, dashboard included.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how-it-works" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">How it works</div>
+        <h2>Instrument in minutes, not days</h2>
+        <p>Three steps to full observability across your entire LLM stack.</p>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">Step 01</div>
+          <h3>Install the SDK</h3>
+          <p>Add @pulse/sdk to your project. Works with Bun, Node, and any JavaScript runtime.</p>
+          <div class="step-code">
+            <span class="fn">$</span> bun add <span class="str">@pulse/sdk</span>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">Step 02</div>
+          <h3>Wrap your LLM client</h3>
+          <p>Call <code>observe()</code> on your existing client. No other code changes needed.</p>
+          <div class="step-code">
+            <span class="kw">const</span> client = <span class="fn">observe</span>(<br />
+            &nbsp;&nbsp;<span class="kw">new</span> OpenAI({...}),<br />
+            &nbsp;&nbsp;Provider.OpenAI<br />
+            );
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">Step 03</div>
+          <h3>Open the dashboard</h3>
+          <p>Traces flow in automatically. Search, filter, and analyze from the Pulse dashboard.</p>
+          <div class="step-code">
+            142 traces captured<br />
+            $0.47 total cost<br />
+            avg latency 1.2s
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING -->
+  <section id="pricing" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Pricing</div>
+        <h2>Start free, scale when ready</h2>
+        <p>Use our hosted platform or self-host the entire stack for free.</p>
+      </div>
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="price-tier">Starter</div>
+          <div class="price-amount">$0 <span>/ mo</span></div>
+          <p class="price-desc">For individuals and side projects exploring LLM observability.</p>
+          <ul class="price-features">
+            <li>10,000 traces / month</li>
+            <li>1 project</li>
+            <li>7-day retention</li>
+            <li>Community support</li>
+          </ul>
+          <a href="#" class="btn">Get started</a>
+        </div>
+        <div class="price-card featured">
+          <div class="price-tier">Pro</div>
+          <div class="price-amount">$49 <span>/ mo</span></div>
+          <p class="price-desc">For teams building production LLM applications.</p>
+          <ul class="price-features">
+            <li>500,000 traces / month</li>
+            <li>Unlimited projects</li>
+            <li>30-day retention</li>
+            <li>Priority support</li>
+            <li>Usage-based overages</li>
+          </ul>
+          <a href="#" class="btn btn-primary">Start free trial</a>
+        </div>
+        <div class="price-card">
+          <div class="price-tier">Enterprise</div>
+          <div class="price-amount">Custom</div>
+          <p class="price-desc">For organizations with compliance, scale, or deployment needs.</p>
+          <ul class="price-features">
+            <li>Unlimited traces</li>
+            <li>SSO &amp; RBAC</li>
+            <li>Custom retention</li>
+            <li>Private region deployment</li>
+            <li>Dedicated support</li>
+          </ul>
+          <a href="#" class="btn">Contact sales</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELF HOST -->
+  <section id="self-host" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Self-hosted</div>
+      </div>
+      <div class="selfhost-grid">
+        <div class="selfhost-content">
+          <h2>Your infrastructure, zero compromise</h2>
+          <p>Deploy the full Pulse stack on your own servers. Same features, full data control.</p>
+          <ul class="selfhost-list">
+            <li>Full data residency. Prompts and completions never leave your network.</li>
+            <li>Docker Compose for dev, Kubernetes-ready for production.</li>
+            <li>Community edition is free forever with no feature gating.</li>
+            <li>Optional paid support for teams that need deployment help.</li>
+          </ul>
+          <a href="#docs" class="btn btn-lg">Read the self-host guide</a>
+        </div>
+        <div class="selfhost-terminal">
+          <div class="term-bar">terminal</div>
+          <div class="term-body">
+            <div><span class="prompt">$</span> <span class="cmd">git clone https://github.com/pulsehq/pulse.git</span></div>
+            <div><span class="out">Cloning into 'pulse'...</span></div>
+            <br />
+            <div><span class="prompt">$</span> <span class="cmd">cd pulse</span></div>
+            <br />
+            <div><span class="prompt">$</span> <span class="cmd">cp .env.example .env</span></div>
+            <br />
+            <div><span class="prompt">$</span> <span class="cmd">docker compose up -d</span></div>
+            <div><span class="out">Creating pulse-postgres ... done</span></div>
+            <div><span class="out">Creating pulse-api     ... done</span></div>
+            <div><span class="out">Creating pulse-dash    ... done</span></div>
+            <br />
+            <div><span class="prompt">$</span> <span class="cmd">open http://localhost:3000</span></div>
+            <div><span class="out">Dashboard ready.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOCS -->
+  <section id="docs" class="section">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Documentation</div>
+        <h2>Built for engineers who read docs first</h2>
+        <p>Guides, API reference, and examples to get you from zero to production.</p>
+      </div>
+      <div class="docs-grid">
+        <a href="#" class="doc-card">
+          <div class="doc-label">Getting started</div>
+          <h3>Quickstart</h3>
+          <p>Install the SDK, create an API key, and capture your first trace in under 5 minutes.</p>
+          <div class="doc-link">Read guide &rarr;</div>
+        </a>
+        <a href="#" class="doc-card">
+          <div class="doc-label">SDK</div>
+          <h3>Provider adapters</h3>
+          <p>Integrate with OpenAI, Anthropic, and OpenRouter using the observe() wrapper.</p>
+          <div class="doc-link">Read guide &rarr;</div>
+        </a>
+        <a href="#" class="doc-card">
+          <div class="doc-label">API</div>
+          <h3>REST API reference</h3>
+          <p>Query traces, sessions, and analytics programmatically. Full endpoint documentation.</p>
+          <div class="doc-link">Read guide &rarr;</div>
+        </a>
+        <a href="#" class="doc-card">
+          <div class="doc-label">Deployment</div>
+          <h3>Self-host setup</h3>
+          <p>Docker Compose quickstart, environment variables, Postgres configuration, and production tips.</p>
+          <div class="doc-link">Read guide &rarr;</div>
+        </a>
+        <a href="#" class="doc-card">
+          <div class="doc-label">Concepts</div>
+          <h3>Traces &amp; sessions</h3>
+          <p>How Pulse structures data. Traces, sessions, metadata, and the schema explained.</p>
+          <div class="doc-link">Read guide &rarr;</div>
+        </a>
+        <a href="#" class="doc-card">
+          <div class="doc-label">Dashboard</div>
+          <h3>Analytics &amp; search</h3>
+          <p>Search traces, view sessions, and monitor cost and latency trends from the dashboard.</p>
+          <div class="doc-link">Read guide &rarr;</div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div class="container">
+      <h2>Start seeing what your LLMs are doing</h2>
+      <p>Free hosted tier. Free self-hosted forever. No credit card required.</p>
+      <div class="cta-actions">
+        <a href="#pricing" class="btn btn-primary btn-lg">Start free</a>
+        <a href="#self-host" class="btn btn-lg">Self-host Pulse</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo">Pulse</div>
+          <p>LLM observability. Hosted or self-hosted. Built for engineers.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="#self-host">Self-host</a></li>
+            <li><a href="#">Changelog</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Developers</h4>
+          <ul>
+            <li><a href="#docs">Documentation</a></li>
+            <li><a href="#">SDK Reference</a></li>
+            <li><a href="#">API Reference</a></li>
+            <li><a href="#">GitHub</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Blog</a></li>
+            <li><a href="#">Privacy</a></li>
+            <li><a href="#">Terms</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>&copy; 2026 Pulse. All rights reserved.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
